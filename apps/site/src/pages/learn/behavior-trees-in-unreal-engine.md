@@ -3,7 +3,7 @@ layout: ../../layouts/ArticleLayout.astro
 title: "Behavior Trees in Unreal Engine: How UE's Built-In System Works"
 description: "Unreal Engine ships behavior trees natively. Learn how UE's behavior trees, blackboards, tasks, decorators and services fit together, how UE's model differs from classic BTs, and how to design trees before you build them."
 pubDate: "2026-07-20"
-order: 5
+order: 7
 ---
 
 # Behavior Trees in Unreal Engine
@@ -25,8 +25,9 @@ This guide explains the moving parts and — importantly — where Unreal's impl
 Building UE AI involves four assets/classes working together:
 
 - **AIController** — possesses the Pawn and runs the behavior tree (`RunBehaviorTree`).
-- **Blackboard** — a key/value store (target actor, last known location, flee flag) that is
-  the tree's working memory. Tasks read and write it; decorators observe it.
+- **[Blackboard](/learn/behavior-tree-blackboard/)** — a key/value store (target actor,
+  last known location, flee flag) that is the tree's working memory. Tasks read and write
+  it; decorators observe it.
 - **Behavior Tree asset** — the tree itself, edited in UE's node graph editor.
 - **Tasks, Decorators, Services** — the node types you implement in Blueprint or C++.
 
@@ -53,7 +54,7 @@ Two things trip up people coming from textbook BTs:
    running branches when values change (the "Observer Aborts" setting: None / Self / Lower
    Priority / Both). Same reactive semantics, much cheaper — but it means priority
    preemption only happens where you've configured aborts, which is the #1 source of
-   "why won't my tree switch branches?" confusion.
+   ["why won't my tree switch branches?"](/learn/debugging-behavior-trees/) confusion.
 
 ## A minimal working setup
 

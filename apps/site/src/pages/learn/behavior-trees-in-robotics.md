@@ -3,7 +3,7 @@ layout: ../../layouts/ArticleLayout.astro
 title: "Behavior Trees in Robotics: BehaviorTree.CPP, ROS 2, and Nav2"
 description: "Why robotics adopted behavior trees from games — and how BehaviorTree.CPP, ROS 2, and the Nav2 navigation stack use them today, with the key differences from game-style trees."
 pubDate: "2026-07-20"
-order: 6
+order: 9
 ---
 
 # Behavior Trees in Robotics
@@ -75,6 +75,8 @@ Its default "navigate to pose" logic is a behavior tree XML you can read and cus
 compute a path (with retries and rate throttling), follow it, and on failure run recovery
 branches — clear costmaps, spin in place, back up, wait — in fallback order.
 
+<a class="try-editor" href="/?example=robot-navigate-recovery">▶ Explore a Nav2-style navigate-with-recovery tree</a>
+
 The practical superpower: **changing robot behavior means editing an XML tree, not
 recompiling a node graph.** Want the robot to try re-planning five times before backing up?
 Edit the tree. Fleet operators tune per-site behavior this way.
@@ -110,3 +112,4 @@ BT.CPP subtrees the same way — subtree reuse maps naturally onto "skills" a ro
 - [What Is a Behavior Tree?](/learn/what-is-a-behavior-tree/)
 - [Sequence, Selector, and Decorator Nodes Explained](/learn/behavior-tree-nodes-explained/)
 - [Behavior Trees vs Finite State Machines](/learn/behavior-trees-vs-state-machines/)
+- Python-first stack? [Behavior Trees in Python with py_trees](/learn/behavior-trees-in-python/)

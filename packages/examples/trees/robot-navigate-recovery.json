@@ -1,0 +1,29 @@
+{
+  "id": "robot-navigate-recovery",
+  "title": "Robot Navigation With Recovery",
+  "description": "A Nav2-style navigate-to-pose tree: plan a path (with retries) and follow it; when navigation fails, run recovery behaviors in escalating fallback order — clear costmaps, spin, back up, wait — then retry navigation.",
+  "root": "n1",
+  "properties": {},
+  "custom_nodes": [
+    { "name": "ComputePathToPose", "category": "action", "title": "Compute Path To Pose", "description": "Asks the planner for a path from the robot to the goal pose.", "properties": { "goal": "goal_pose" } },
+    { "name": "FollowPath", "category": "action", "title": "Follow Path", "description": "Drives the robot along the planned path; fails if the robot gets stuck or the path becomes blocked.", "properties": { "controller": "FollowPath" } },
+    { "name": "ClearCostmaps", "category": "action", "title": "Clear Costmaps", "description": "Cheapest recovery: wipes stale obstacle data so planning can see freed space.", "properties": {} },
+    { "name": "Spin", "category": "action", "title": "Spin In Place", "description": "Rotates in place to refresh sensor coverage around the robot.", "properties": { "degrees": 90 } },
+    { "name": "BackUp", "category": "action", "title": "Back Up", "description": "Reverses a short distance to escape a tight spot.", "properties": { "distance": 0.3 } }
+  ],
+  "nodes": {
+    "n1": { "id": "n1", "name": "RepeatUntilSuccess", "title": "Retry Navigation", "description": "The whole attempt loops until navigation succeeds or the retry budget runs out.", "properties": { "maxLoop": 6 }, "display": { "x": 0, "y": 0 }, "child": "n2" },
+    "n2": { "id": "n2", "name": "Priority", "title": "Navigate Or Recover", "description": "Try to navigate; only when that fails does a recovery run.", "properties": {}, "display": { "x": 0, "y": 0 }, "children": ["n3", "n7"] },
+    "n3": { "id": "n3", "name": "MemSequence", "title": "Navigate", "description": "A procedural checklist, so a long FollowPath is not restarted every tick.", "properties": {}, "display": { "x": 0, "y": 0 }, "children": ["n4", "n6"] },
+    "n4": { "id": "n4", "name": "RepeatUntilSuccess", "title": "Retry Planning", "description": "", "properties": { "maxLoop": 3 }, "display": { "x": 0, "y": 0 }, "child": "n5" },
+    "n5": { "id": "n5", "name": "ComputePathToPose", "title": "Compute Path To Pose", "description": "", "properties": { "goal": "goal_pose" }, "display": { "x": 0, "y": 0 } },
+    "n6": { "id": "n6", "name": "FollowPath", "title": "Follow Path", "description": "", "properties": { "controller": "FollowPath" }, "display": { "x": 0, "y": 0 } },
+    "n7": { "id": "n7", "name": "Sequence", "title": "Recover", "description": "Runs one recovery, then deliberately fails so the retry loop navigates again.", "properties": {}, "display": { "x": 0, "y": 0 }, "children": ["n8", "n13"] },
+    "n8": { "id": "n8", "name": "Priority", "title": "Recovery Behaviors", "description": "Escalating fallbacks, cheapest first.", "properties": {}, "display": { "x": 0, "y": 0 }, "children": ["n9", "n10", "n11", "n12"] },
+    "n9": { "id": "n9", "name": "ClearCostmaps", "title": "Clear Costmaps", "description": "", "properties": {}, "display": { "x": 0, "y": 0 } },
+    "n10": { "id": "n10", "name": "Spin", "title": "Spin In Place", "description": "", "properties": { "degrees": 90 }, "display": { "x": 0, "y": 0 } },
+    "n11": { "id": "n11", "name": "BackUp", "title": "Back Up", "description": "", "properties": { "distance": 0.3 }, "display": { "x": 0, "y": 0 } },
+    "n12": { "id": "n12", "name": "Wait", "title": "Wait", "description": "Last resort: wait for the world to change (a door to open, a person to pass).", "properties": { "milliseconds": 5000 }, "display": { "x": 0, "y": 0 } },
+    "n13": { "id": "n13", "name": "Failer", "title": "Recovery Done — Go Retry", "description": "Forces the branch to fail so RepeatUntilSuccess ticks navigation again.", "properties": {}, "display": { "x": 0, "y": 0 } }
+  }
+}

@@ -114,7 +114,8 @@ Failure if no path exists.
 Design tip: keep leaves *small and parameterized*. A generic `MoveTo(target, speed)` action
 reused twelve places beats twelve bespoke movement actions. Your condition/action leaves are
 the API between the tree (design) and your engine code (implementation) — the tree stays
-readable exactly as long as that API stays clean.
+readable exactly as long as that API stays clean. (Leaves share data through a
+[blackboard](/learn/behavior-tree-blackboard/) — that's how `MoveTo` knows *where*.)
 
 ## Putting it together
 
@@ -144,6 +145,9 @@ transition logic written anywhere.
 
 - New to the concept? Start with [What Is a Behavior Tree?](/learn/what-is-a-behavior-tree/)
 - See these nodes at work in [common game AI patterns](/learn/behavior-tree-examples/)
+- Tree misbehaving? The [six classic mistakes](/learn/debugging-behavior-trees/) are all
+  tick-semantics bugs
+- Want to implement these yourself? [From scratch in ~100 lines](/learn/how-to-implement-a-behavior-tree/)
 - Engine-specific guides: [Unity](/learn/behavior-trees-in-unity/) ·
   [Unreal](/learn/behavior-trees-in-unreal-engine/) ·
   [Robotics](/learn/behavior-trees-in-robotics/)

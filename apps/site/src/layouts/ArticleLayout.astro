@@ -5,6 +5,7 @@ const description = frontmatter?.description ?? Astro.props.description;
 const pubDate = frontmatter?.pubDate;
 const updatedDate = frontmatter?.updatedDate;
 const isArticle = !!frontmatter;
+const isDraft = !!frontmatter?.draft;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 
 // Amazon Associates ID for the behaviortrees.com account.
@@ -73,6 +74,7 @@ const jsonLd = isArticle
 
     <title>{title}</title>
     <meta name="description" content={description} />
+    {isDraft && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
 
     <meta property="og:type" content={isArticle ? 'article' : 'website'} />
@@ -158,6 +160,7 @@ const jsonLd = isArticle
     </script>
 
     <main>
+        {isDraft && <p class="draft-banner">Draft — unlisted and not indexed until published.</p>}
         <article>
             <slot />
         </article>
@@ -515,6 +518,16 @@ const jsonLd = isArticle
     }
     .try-editor:hover {
         background: color-mix(in srgb, var(--bt-accent) 14%, transparent);
+    }
+
+    .draft-banner {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--acc-soft);
+        border: 1px dashed var(--bt-accent);
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        margin: 0 0 2rem;
     }
 
     .disclosure {

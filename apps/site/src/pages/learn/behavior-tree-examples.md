@@ -3,7 +3,7 @@ layout: ../../layouts/ArticleLayout.astro
 title: "Behavior Tree Examples: 5 Common Game AI Patterns"
 description: "Worked behavior tree examples you can open in a free online editor: patrol/chase/attack enemies, guard posts, fleeing at low health, retry loops, and cooldown-gated special attacks."
 pubDate: "2026-07-20"
-order: 7
+order: 11
 ---
 
 # Behavior Tree Examples: Common Game AI Patterns
@@ -47,7 +47,9 @@ Selector "Enter the room"
 
 This is the same shape robots use for recovery behaviors — see
 [behavior trees in robotics](/learn/behavior-trees-in-robotics/) — replanning, then
-clearing sensor maps, then backing up, in escalating order.
+clearing sensor maps, then backing up, in escalating order. The
+[navigate-with-recovery example](/?example=robot-navigate-recovery) is exactly that,
+modeled on the ROS 2 Nav2 stack.
 
 ## 3. The survival override
 
@@ -60,6 +62,8 @@ Selector "Brain"
 │   └── Selector: Flee To Cover | Use Health Item | Fight Cornered
 ├── ...normal combat ladder...
 ```
+
+<a class="try-editor" href="/?example=survival-override">▶ Open this tree in the editor</a>
 
 Because selectors re-evaluate every tick, the agent abandons *any* lower branch the moment
 health drops — no transitions required. (This exact pattern is why behavior trees beat
@@ -96,6 +100,8 @@ Selector "Choose attack"
 └── Melee Attack
 ```
 
+<a class="try-editor" href="/?example=cooldown-specials">▶ Open this tree in the editor</a>
+
 The AI automatically "prefers" the special whenever it's legal and degrades gracefully to
 basic attacks — designers tune feel by reordering children and adjusting cooldowns, without
 touching code. (Attach the cooldown to the *sequence*, not the condition, or you'll start
@@ -106,7 +112,9 @@ the cooldown on failed range checks.)
 Real agents are these five patterns nested: a survival override on top, a priority ladder
 under it, fallback chains inside each rung, retries around unreliable actions, cooldowns on
 specials. Because each pattern is a self-contained subtree, you can build and test them
-independently, then graft them together.
+independently, then graft them together — the techniques for keeping that composition
+readable as it grows are covered in
+[Structuring Large Behavior Trees](/learn/structuring-large-behavior-trees/).
 
 Build your own in the [behavior tree editor](/) — start from the enemy example, add a
 survival branch, and export JSON for [Unity](/learn/behavior-trees-in-unity/),

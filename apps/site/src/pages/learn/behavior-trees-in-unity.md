@@ -3,7 +3,7 @@ layout: ../../layouts/ArticleLayout.astro
 title: "Behavior Trees in Unity: Options, Assets, and How to Choose"
 description: "Every way to get behavior trees into Unity in 2026 — Unity Behavior, Behavior Designer, NodeCanvas, open-source libraries, or rolling your own — with honest trade-offs and a design-first workflow."
 pubDate: "2026-07-20"
-order: 4
+order: 6
 ---
 
 # Behavior Trees in Unity
@@ -63,7 +63,7 @@ or your budget is zero.
 ## Option 5: roll your own
 
 A minimal BT core — node base class, three statuses, sequence/selector/decorator — is a few
-hundred lines of C#. Many senior programmers do exactly this for control and debuggability.
+hundred lines of C# ([here's the complete shape](/learn/how-to-implement-a-behavior-tree/)). Many senior programmers do exactly this for control and debuggability.
 The trap isn't the core; it's the six months of tooling (visual authoring, runtime
 inspection, serialization) you'll slowly rebuild. If you go this route, design trees in an
 external editor rather than hand-writing construction code.
@@ -94,4 +94,5 @@ For free reading, the **Game AI Pro** series chapters on behavior trees are
 
 - [Sequence, Selector, and Decorator Nodes Explained](/learn/behavior-tree-nodes-explained/)
 - [Behavior Tree Examples: Common Game AI Patterns](/learn/behavior-tree-examples/)
-- Shipping on Unreal too? See [Behavior Trees in Unreal Engine](/learn/behavior-trees-in-unreal-engine/)
+- Shipping on other engines too? [Unreal Engine](/learn/behavior-trees-in-unreal-engine/) ·
+  [Godot](/learn/behavior-trees-in-godot/)

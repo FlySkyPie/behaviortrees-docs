@@ -1,0 +1,26 @@
+{
+  "id": "cooldown-specials",
+  "title": "Cooldown-Gated Special Attacks",
+  "description": "Attack selection with a priority selector: a dramatic rocket attack gated by a cooldown decorator, falling back to shooting while ammo lasts, then melee. Note the cooldown wraps the whole rocket sequence, not just the range check.",
+  "root": "n1",
+  "properties": {},
+  "custom_nodes": [
+    { "name": "Cooldown", "category": "decorator", "title": "Cooldown <milliseconds>ms", "description": "Fails without running its child until the cooldown has elapsed since the last completed run.", "properties": { "milliseconds": 10000 } },
+    { "name": "IsPlayerInRange", "category": "condition", "title": "Is Player In Range?", "description": "Succeeds if the player is within the given range.", "properties": { "range": 8 } },
+    { "name": "FireRocket", "category": "action", "title": "Fire Rocket", "description": "Fires the rocket launcher at the player.", "properties": {} },
+    { "name": "HasAmmo", "category": "condition", "title": "Has Ammo?", "description": "Succeeds if the primary weapon has ammunition left.", "properties": {} },
+    { "name": "ShootPlayer", "category": "action", "title": "Shoot Player", "description": "Fires the primary weapon at the player.", "properties": {} },
+    { "name": "MeleeAttack", "category": "action", "title": "Melee Attack", "description": "Unconditional fallback: swings at the player up close.", "properties": {} }
+  ],
+  "nodes": {
+    "n1": { "id": "n1", "name": "Priority", "title": "Choose Attack", "description": "Prefers the special whenever it is legal, degrading gracefully to basic attacks.", "properties": {}, "display": { "x": 0, "y": 0 }, "children": ["n2", "n6", "n9"] },
+    "n2": { "id": "n2", "name": "Cooldown", "title": "Cooldown", "description": "", "properties": { "milliseconds": 10000 }, "display": { "x": 0, "y": 0 }, "child": "n3" },
+    "n3": { "id": "n3", "name": "Sequence", "title": "Rocket Attack", "description": "", "properties": {}, "display": { "x": 0, "y": 0 }, "children": ["n4", "n5"] },
+    "n4": { "id": "n4", "name": "IsPlayerInRange", "title": "Is Player In Range?", "description": "", "properties": { "range": 8 }, "display": { "x": 0, "y": 0 } },
+    "n5": { "id": "n5", "name": "FireRocket", "title": "Fire Rocket", "description": "", "properties": {}, "display": { "x": 0, "y": 0 } },
+    "n6": { "id": "n6", "name": "Sequence", "title": "Shoot", "description": "", "properties": {}, "display": { "x": 0, "y": 0 }, "children": ["n7", "n8"] },
+    "n7": { "id": "n7", "name": "HasAmmo", "title": "Has Ammo?", "description": "", "properties": {}, "display": { "x": 0, "y": 0 } },
+    "n8": { "id": "n8", "name": "ShootPlayer", "title": "Shoot Player", "description": "", "properties": {}, "display": { "x": 0, "y": 0 } },
+    "n9": { "id": "n9", "name": "MeleeAttack", "title": "Melee Attack", "description": "", "properties": {}, "display": { "x": 0, "y": 0 } }
+  }
+}

@@ -3,7 +3,7 @@ layout: ../../layouts/ArticleLayout.astro
 title: "Behavior Trees vs Finite State Machines: Which Should You Use?"
 description: "An honest comparison of behavior trees and finite state machines for game AI — scalability, reactivity, debugging, performance — with concrete guidance on when each one wins."
 pubDate: "2026-07-20"
-order: 3
+order: 4
 ---
 
 # Behavior Trees vs Finite State Machines
@@ -46,8 +46,9 @@ stored.
 
 BTs also re-evaluate conditions every tick, which is both their superpower (reactivity) and
 a cost: naive trees re-run expensive checks (visibility raycasts, pathfinding queries)
-constantly. Real projects cache expensive queries in a blackboard, tick trees at lower
-frequencies, or use event-driven variants.
+constantly. Real projects cache expensive queries in a
+[blackboard](/learn/behavior-tree-blackboard/), tick trees at lower frequencies, or use
+event-driven variants.
 
 ## Head to head
 
@@ -71,7 +72,8 @@ This isn't actually an either/or. Common production patterns:
 - **FSM at the top, BTs inside.** High-level game modes are states; the combat mode's brain
   is a behavior tree.
 - **Utility scoring bolted on.** Some games score branches by utility functions instead of
-  fixed priority order — utility AI and BTs compose well.
+  fixed priority order — utility AI and BTs compose well. (Weighing those architectures
+  too? See [Behavior Trees vs GOAP vs Utility AI](/learn/behavior-trees-vs-goap-vs-utility-ai/).)
 
 ## So which should you use?
 

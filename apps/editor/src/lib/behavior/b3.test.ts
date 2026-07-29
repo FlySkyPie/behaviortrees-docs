@@ -22,7 +22,14 @@ const EXAMPLES_DIR = join(
 const load = (name: string): B3Tree =>
   JSON.parse(readFileSync(join(EXAMPLES_DIR, name), 'utf8'));
 
-const EXAMPLES = ['enemy-patrol.json', 'open-the-door.json', 'robot-pick-and-place.json'];
+const EXAMPLES = [
+  'enemy-patrol.json',
+  'open-the-door.json',
+  'robot-pick-and-place.json',
+  'survival-override.json',
+  'cooldown-specials.json',
+  'robot-navigate-recovery.json',
+];
 
 // Everything except layout/display information must survive a round trip
 function semantics(data: B3Tree) {
@@ -119,7 +126,7 @@ describe('round trip', () => {
     const exported = projectToB3(project);
     expect(exported.scope).toBe('project');
     expect(Array.isArray(exported.trees)).toBe(true);
-    expect(exported.trees).toHaveLength(3);
+    expect(exported.trees).toHaveLength(EXAMPLES.length);
     expect(exported.selectedTree).toBe(project.selectedTreeId);
 
     const reimported = b3ToProject(exported);

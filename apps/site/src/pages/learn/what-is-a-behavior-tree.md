@@ -124,6 +124,9 @@ clean JSON you can load in your engine or framework.
   a deeper look at every node type with worked examples
 - [Behavior Trees vs Finite State Machines](/learn/behavior-trees-vs-state-machines/)
 - [Behavior Trees in Unity](/learn/behavior-trees-in-unity/) ·
-  [Behavior Trees in Unreal Engine](/learn/behavior-trees-in-unreal-engine/) ·
-  [Behavior Trees in Robotics](/learn/behavior-trees-in-robotics/)
+  [Unreal Engine](/learn/behavior-trees-in-unreal-engine/) ·
+  [Godot](/learn/behavior-trees-in-godot/) ·
+  [Robotics](/learn/behavior-trees-in-robotics/) ·
+  [Python](/learn/behavior-trees-in-python/)
 - [Behavior Tree Examples: Common Game AI Patterns](/learn/behavior-tree-examples/)
+- Ready to code? [How to Write a Behavior Tree from Scratch](/learn/how-to-implement-a-behavior-tree/)
