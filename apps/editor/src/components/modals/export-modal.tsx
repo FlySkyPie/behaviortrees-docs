@@ -18,6 +18,7 @@ import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { useProjectStore } from '../../stores/useProjectStore';
 import { customNodesToB3, projectToB3, treeToB3 } from '../../lib/behavior/b3';
 import { track } from '../../lib/analytics';
+import { recordActivation } from '../../lib/product-metrics';
 import { toast } from 'sonner';
 import { CheckIcon, DownloadIcon, ClipboardIcon, ChevronDownIcon } from 'lucide-react';
 
@@ -80,6 +81,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
 			await navigator.clipboard.writeText(exportData);
 			setCopied(true);
 			track('export', { type, format, method: 'copy' });
+			if (project) recordActivation(project, 'export');
 			toast.success('Copied to clipboard');
 
 			// Reset copied status after a delay
@@ -133,6 +135,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
 			URL.revokeObjectURL(url);
 
 			track('export', { type, format, method: 'download' });
+			if (project) recordActivation(project, 'export');
 			toast.success('Export file downloaded');
 		} catch (error) {
 			console.error('Error downloading export:', error);

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useProjectStore } from '../../stores/useProjectStore';
 import { track } from '../../lib/analytics';
+import { recordActivation } from '../../lib/product-metrics';
 import { toast } from 'sonner';
 import ExportModal, { ExportType } from '../modals/export-modal';
 import ImportModal from '../modals/import-modal';
@@ -79,6 +80,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = ({
     if (project) {
       if (saveProjectStore()) {
         track('project_saved');
+        recordActivation(project, 'save');
         toast.success('Project saved successfully');
       } else {
         toast.error('Failed to save project');

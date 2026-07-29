@@ -10,6 +10,7 @@ import {
 } from '../../lib/storage/local-projects';
 import { useSyncStore } from '../../lib/storage/cloud-sync';
 import { track } from '../../lib/analytics';
+import { setProjectOrigin } from '../../lib/product-metrics';
 import { Button } from '../../components/ui/button';
 import { Plus, Download, Trash, FolderOpen, Pencil, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -55,7 +56,7 @@ const ProjectsPage: React.FC = () => {
   const handleCreateProject = () => {
     if (projectName.trim() === '') return;
     
-    // createProject persists via the store's saveProject
+    // createProject persists via the store's saveProject and records origin
     createProject(projectName, projectDescription);
     track('project_created');
     toast.success('Project created successfully');
@@ -114,9 +115,15 @@ const ProjectsPage: React.FC = () => {
 
         if (imported.kind === 'project') {
           loadProject(imported.project);
+          setProjectOrigin(imported.project.id, 'import');
         } else if (imported.kind === 'tree') {
           // A standalone tree file becomes a new single-tree project
-          loadProject(b3ToProject({ trees: [imported.tree], custom_nodes: imported.tree.custom_nodes }));
+          const importedProject = b3ToProject({
+            trees: [imported.tree],
+            custom_nodes: imported.tree.custom_nodes,
+          });
+          loadProject(importedProject);
+          setProjectOrigin(importedProject.id, 'import');
         } else {
           toast.error('Node files can be imported from within the editor');
           return;

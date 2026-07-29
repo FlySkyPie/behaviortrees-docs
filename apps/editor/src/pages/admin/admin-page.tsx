@@ -5,6 +5,7 @@ import { CLOUD_ENABLED } from '../../lib/auth';
 import {
   AdminDashboardResponse,
   ApiError,
+  CommercialInterestsSection,
   PlausibleSection,
   PostHogSection,
   ProjectsSection,
@@ -175,6 +176,113 @@ const EventsCard: React.FC<{ data: PostHogSection | SectionError }> = ({ data })
   );
 };
 
+const FunnelCard: React.FC<{ data: PostHogSection | SectionError }> = ({ data }) => (
+  <div className="card">
+    <h2 className="text-xl font-medium mb-4">Commercial funnel (unique users, 30 days)</h2>
+    {isSectionError(data) ? (
+      <SectionErrorBox source="PostHog funnel" error={data.error} />
+    ) : (
+      <RankedTable
+        title="Funnel events"
+        rows={data.funnel.map((row) => ({ name: row.event, value: row.users }))}
+      />
+    )}
+  </div>
+);
+
+const RetentionCard: React.FC<{ data: PostHogSection | SectionError }> = ({ data }) => (
+  <div className="card">
+    <h2 className="text-xl font-medium mb-4">Activated-user retention</h2>
+    {isSectionError(data) ? (
+      <SectionErrorBox source="PostHog retention" error={data.error} />
+    ) : (
+      <div className="grid gap-4 sm:grid-cols-2">
+        {[
+          { label: 'D7 return (days 7–13)', value: data.retention.d7 },
+          { label: 'D30 return (days 28–35)', value: data.retention.d30 },
+        ].map((period) => (
+          <div key={period.label} className="rounded-md border border-divider p-4">
+            <div className="text-2xl font-medium">
+              {period.value.eligible > 0 ? `${Math.round(period.value.rate)}%` : '—'}
+            </div>
+            <div className="mt-1 text-sm text-muted">{period.label}</div>
+            <div className="mt-2 text-xs text-faint">
+              {formatNumber(period.value.returned)} returned of{' '}
+              {formatNumber(period.value.eligible)} eligible
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+const CommercialInterestsCard: React.FC<{
+  data: CommercialInterestsSection | SectionError;
+}> = ({ data }) => {
+  if (isSectionError(data)) {
+    return (
+      <div className="card">
+        <h2 className="text-xl font-medium mb-4">Early-access requests</h2>
+        <SectionErrorBox source="commercial interests" error={data.error} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="card">
+      <h2 className="text-xl font-medium mb-4">Early-access requests</h2>
+      <div className="grid gap-8 md:grid-cols-3">
+        <RankedTable title="By plan" rows={data.byPlan} />
+        <RankedTable title="By runtime" rows={data.byRuntime} />
+        <RankedTable title="By team size" rows={data.byUsage} />
+      </div>
+
+      <h3 className="mt-8 mb-2 text-sm font-medium text-muted">Latest requests</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-muted">
+              <th className="pb-2 font-medium">Email</th>
+              <th className="pb-2 font-medium">Plan</th>
+              <th className="pb-2 font-medium">Runtime</th>
+              <th className="pb-2 font-medium">Team</th>
+              <th className="pb-2 font-medium">Obstacle</th>
+              <th className="pb-2 font-medium text-right">Received</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.latest.map((row) => (
+              <tr key={`${row.email}-${row.plan}`} className="border-t border-divider">
+                <td className="py-1.5 pr-4">{row.email}</td>
+                <td className="py-1.5 pr-4 text-muted">{row.plan}</td>
+                <td className="py-1.5 pr-4 text-muted">{row.runtime}</td>
+                <td className="py-1.5 pr-4 text-muted">{row.usageMode}</td>
+                <td
+                  className="max-w-[260px] truncate py-1.5 pr-4 text-muted"
+                  title={row.obstacleDetail ?? row.obstacle}
+                >
+                  {row.obstacleDetail ?? row.obstacle}
+                </td>
+                <td className="py-1.5 text-right text-faint whitespace-nowrap">
+                  {new Date(row.createdAt).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+            {data.latest.length === 0 && (
+              <tr>
+                <td className="py-1.5 text-faint" colSpan={6}>
+                  No requests yet
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 const LatestProjectsCard: React.FC<{ data: ProjectsSection | SectionError }> = ({ data }) => (
   <div className="card">
     <h2 className="text-xl font-medium mb-4">Latest saved projects</h2>
@@ -279,6 +387,12 @@ const AdminDashboard: React.FC = () => {
 
   const plausible = data.plausible;
   const projects = data.projects;
+  const posthog = data.posthog;
+  const interests = data.interests;
+  const funnelValue = (event: string) =>
+    isSectionError(posthog)
+      ? null
+      : posthog.funnel.find((row) => row.event === event)?.users ?? 0;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -300,7 +414,7 @@ const AdminDashboard: React.FC = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
         <StatTile
           label="Visitors (30d)"
           value={isSectionError(plausible) ? '—' : formatNumber(plausible.range30d.visitors)}
@@ -321,10 +435,25 @@ const AdminDashboard: React.FC = () => {
           label="Users with projects"
           value={isSectionError(projects) ? '—' : formatNumber(projects.totalUsers)}
         />
+        <StatTile
+          label="Activated users (30d)"
+          value={
+            funnelValue('activation_completed') === null
+              ? '—'
+              : formatNumber(funnelValue('activation_completed')!)
+          }
+        />
+        <StatTile
+          label="Access requests"
+          value={isSectionError(interests) ? '—' : formatNumber(interests.total)}
+        />
       </div>
 
       <TrafficCard data={data.plausible} />
       <EventsCard data={data.posthog} />
+      <FunnelCard data={data.posthog} />
+      <RetentionCard data={data.posthog} />
+      <CommercialInterestsCard data={data.interests} />
       <LatestProjectsCard data={data.projects} />
     </div>
   );

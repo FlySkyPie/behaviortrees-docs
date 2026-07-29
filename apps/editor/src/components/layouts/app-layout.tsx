@@ -26,17 +26,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 					: 'flex min-h-screen flex-col bg-base text-fg'
 			}
 		>
-			<header className="flex h-[54px] flex-none items-center gap-8 border-b border-divider px-6">
-				<Link to="/" className="flex items-center gap-3">
+			<header className="flex h-[54px] flex-none items-center gap-3 border-b border-divider px-3 sm:gap-6 sm:px-6 lg:gap-8">
+				<Link to="/" className="flex shrink-0 items-center gap-3">
 					<img src="/imgs/logo.svg" alt="" className="h-[22px] w-[22px] rounded-[5px]" />
-					<span className="text-[15px] font-medium tracking-[-0.01em]">
+					<span className="hidden text-[15px] font-medium tracking-[-0.01em] lg:inline">
 						behavior<span className="text-accent">trees</span>
 					</span>
 				</Link>
 
-				<nav>
-					<ul className="flex items-center gap-6 text-[13px]">
-						<li>
+				<nav className="min-w-0">
+					<ul className="flex items-center gap-3 text-[13px] sm:gap-5 lg:gap-6">
+						<li className="hidden sm:block">
 							<NavLink to="/" className={navLinkClass}>
 								Home
 							</NavLink>
@@ -52,26 +52,32 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 							</NavLink>
 						</li>
 						<li>
-							<NavLink to="/settings" className={navLinkClass}>
-								Settings
-							</NavLink>
-						</li>
-						<li>
 							{/* Static guides site deployed alongside the app */}
 							<a href="/learn/" className="text-muted transition-colors hover:text-accent-soft">
 								Learn
 							</a>
 						</li>
+						<li>
+							<NavLink to="/pricing" className={navLinkClass}>
+								Pricing
+							</NavLink>
+						</li>
 						{CLOUD_ENABLED && <AdminNavLink />}
 					</ul>
 				</nav>
 
-				<div className="ml-auto flex items-center gap-5">
+				<div className="ml-auto flex shrink-0 items-center gap-3 text-[13px] sm:gap-5">
+					<NavLink
+						to="/settings"
+						className={(state) => `hidden md:block ${navLinkClass(state)}`}
+					>
+						Settings
+					</NavLink>
 					{isAnalyticsEnabled() && (
 						// The PostHog survey attaches to this class and opens on click
 						<button
 							type="button"
-							className="bt-feedback-button flex cursor-pointer items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-accent-soft"
+							className="bt-feedback-button hidden cursor-pointer items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-accent-soft md:flex"
 						>
 							<MessageSquare className="h-3.5 w-3.5" />
 							Feedback
@@ -92,6 +98,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 							<a href="/learn/" className="text-accent-soft hover:underline">
 								Learn behavior trees
 							</a>{' '}
+							·{' '}
+							<Link to="/pricing" className="text-accent-soft hover:underline">
+								Pricing
+							</Link>{' '}
+							·{' '}
+							<Link to="/privacy" className="text-accent-soft hover:underline">
+								Privacy
+							</Link>{' '}
 							· Prefer the classic editor? It lives on at{' '}
 							<a href="https://old.behaviortrees.com" className="text-accent-soft hover:underline">
 								old.behaviortrees.com

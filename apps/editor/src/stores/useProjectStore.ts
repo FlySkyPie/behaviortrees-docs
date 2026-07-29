@@ -12,6 +12,7 @@ import {
   setCurrentProjectId,
   writeLocalProject,
 } from '../lib/storage/local-projects';
+import { setProjectOrigin } from '../lib/product-metrics';
 
 type Clipboard = {
   blocks: Block[];
@@ -160,6 +161,7 @@ export const useProjectStore = create<ProjectState>()(
 
     createProject: (name, description) => {
       const project = createDefaultProject(name, description);
+      setProjectOrigin(project.id, 'new');
       set(state => {
         state.project = project;
         state.undoStack = [];

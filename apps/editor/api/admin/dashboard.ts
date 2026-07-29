@@ -1,7 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClerkClient } from '@clerk/backend';
 import { requireAdmin } from '../_lib/admin.js';
-import { getProjectTotals, listLatestProjectsAllUsers } from '../_lib/db.js';
+import {
+  getCommercialInterestStats,
+  getProjectTotals,
+  listLatestProjectsAllUsers,
+  type CommercialInterestStats,
+} from '../_lib/db.js';
 import {
   fetchPlausibleStats,
   fetchPostHogStats,
@@ -31,6 +36,7 @@ export type AdminDashboardResponse = {
   plausible: PlausibleStats | SectionError;
   posthog: PostHogStats | SectionError;
   projects: ProjectsSection | SectionError;
+  interests: CommercialInterestStats | SectionError;
 };
 
 // In-memory cache survives on warm lambdas only, which is enough to keep
@@ -103,10 +109,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const [plausible, posthog, projects] = await Promise.allSettled([
+  const [plausible, posthog, projects, interests] = await Promise.allSettled([
     fetchPlausibleStats(),
     fetchPostHogStats(),
     fetchProjectsSection(),
+    getCommercialInterestStats(),
   ]);
 
   const body: AdminDashboardResponse = {
@@ -115,6 +122,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     plausible: settled(plausible, 'plausible'),
     posthog: settled(posthog, 'posthog'),
     projects: settled(projects, 'projects'),
+    interests: settled(interests, 'interests'),
   };
 
   cache = { at: Date.now(), body };

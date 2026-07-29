@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useProjectStore } from '../../stores/useProjectStore';
 import { b3ToTree, parseImportedJson } from '../../lib/behavior/b3';
 import { track } from '../../lib/analytics';
+import { setProjectOrigin } from '../../lib/product-metrics';
 import { toast } from 'sonner';
 import { ClipboardPaste, FileUp, Workflow } from 'lucide-react';
 
@@ -52,6 +53,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onOpenChange }) => {
 
 			if (imported.kind === 'project') {
 				store.loadProject(imported.project);
+				setProjectOrigin(imported.project.id, source === 'example' ? 'example' : 'import');
 				toast.success('Project imported');
 			} else if (imported.kind === 'tree') {
 				if (!store.project) {
@@ -60,6 +62,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onOpenChange }) => {
 				}
 				const { tree, nodes } = b3ToTree(imported.tree, store.project.nodes);
 				store.addImportedTree(tree, nodes);
+				setProjectOrigin(store.project.id, source === 'example' ? 'example' : 'import');
 				toast.success(`Tree "${tree.title}" added`);
 			} else {
 				if (!store.project) {

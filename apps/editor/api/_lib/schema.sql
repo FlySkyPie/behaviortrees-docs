@@ -17,3 +17,24 @@ create table if not exists projects (
 
 create index if not exists projects_user_idx
   on projects (user_id) where deleted_at is null;
+
+-- Pre-billing demand validation. Free-form details stay here rather than in
+-- product analytics so email addresses and customer context are not copied
+-- into PostHog event properties.
+create table if not exists commercial_interests (
+  id                bigserial primary key,
+  email_normalized  text not null,
+  plan              text not null check (plan in ('pro', 'team', 'integration')),
+  runtime           text not null,
+  usage_mode        text not null,
+  obstacle          text not null,
+  obstacle_detail   text,
+  source_path       text not null,
+  contact_consent   boolean not null default false,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now(),
+  unique (email_normalized, plan)
+);
+
+create index if not exists commercial_interests_created_idx
+  on commercial_interests (created_at desc);

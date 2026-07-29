@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useProjectStore } from '../stores/useProjectStore';
 import { b3ToProject, b3ToTree, parseImportedJson } from '../lib/behavior/b3';
 import { track } from '../lib/analytics';
+import { setProjectOrigin } from '../lib/product-metrics';
 
 // Deep links from the /learn guides: /?example=enemy-patrol fetches
 // /examples/enemy-patrol.json and opens it in a stable "Examples" project,
@@ -83,6 +84,7 @@ const ExampleLoader = () => {
 				}
 
 				useProjectStore.getState().saveProject();
+				setProjectOrigin(EXAMPLES_PROJECT_ID, 'guide_example');
 
 				// Drop the query string and land in the editor
 				window.history.replaceState(null, '', '/');

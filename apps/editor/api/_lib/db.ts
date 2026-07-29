@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import type { ValidatedCommercialInterest } from './interest-validate.js';
 
 // All SQL lives here so a later swap to a query builder stays localized.
 
@@ -115,4 +116,104 @@ export async function softDeleteProject(
         data = null
     where user_id = ${userId} and id = ${id} and updated_at <= ${deletedAt}
   `;
+}
+
+export async function upsertCommercialInterest(
+  interest: ValidatedCommercialInterest
+): Promise<void> {
+  const email = interest.email.trim().toLowerCase();
+  await sql()`
+    insert into commercial_interests (
+      email_normalized,
+      plan,
+      runtime,
+      usage_mode,
+      obstacle,
+      obstacle_detail,
+      source_path,
+      contact_consent
+    )
+    values (
+      ${email},
+      ${interest.plan},
+      ${interest.runtime},
+      ${interest.usageMode},
+      ${interest.obstacle},
+      ${interest.obstacleDetail ?? null},
+      ${interest.sourcePath},
+      ${interest.contactConsent}
+    )
+    on conflict (email_normalized, plan) do update
+      set runtime = excluded.runtime,
+          usage_mode = excluded.usage_mode,
+          obstacle = excluded.obstacle,
+          obstacle_detail = excluded.obstacle_detail,
+          source_path = excluded.source_path,
+          contact_consent = excluded.contact_consent,
+          updated_at = now()
+  `;
+}
+
+export type CommercialInterestStats = {
+  total: number;
+  byPlan: { name: string; value: number }[];
+  byRuntime: { name: string; value: number }[];
+  byUsage: { name: string; value: number }[];
+  latest: {
+    email: string;
+    plan: string;
+    runtime: string;
+    usageMode: string;
+    obstacle: string;
+    obstacleDetail: string | null;
+    createdAt: string;
+  }[];
+};
+
+export async function getCommercialInterestStats(): Promise<CommercialInterestStats> {
+  const [totalRows, planRows, runtimeRows, usageRows, latestRows] = await Promise.all([
+    sql()`select count(*)::int as total from commercial_interests`,
+    sql()`
+      select plan as name, count(*)::int as value
+      from commercial_interests group by plan order by value desc
+    `,
+    sql()`
+      select runtime as name, count(*)::int as value
+      from commercial_interests group by runtime order by value desc
+    `,
+    sql()`
+      select usage_mode as name, count(*)::int as value
+      from commercial_interests group by usage_mode order by value desc
+    `,
+    sql()`
+      select email_normalized, plan, runtime, usage_mode, obstacle,
+             obstacle_detail, created_at
+      from commercial_interests
+      order by created_at desc
+      limit 20
+    `,
+  ]);
+
+  const ranked = (rows: Record<string, unknown>[]) =>
+    rows.map((row) => ({
+      name: String(row.name),
+      value: Number(row.value),
+    }));
+
+  return {
+    total: Number(totalRows[0]?.total ?? 0),
+    byPlan: ranked(planRows),
+    byRuntime: ranked(runtimeRows),
+    byUsage: ranked(usageRows),
+    latest: latestRows.map((row) => ({
+      email: String(row.email_normalized),
+      plan: String(row.plan),
+      runtime: String(row.runtime),
+      usageMode: String(row.usage_mode),
+      obstacle: String(row.obstacle),
+      obstacleDetail:
+        row.obstacle_detail === null ? null : String(row.obstacle_detail),
+      createdAt: new Date(row.created_at as string).toISOString(),
+    })),
+  };
 }

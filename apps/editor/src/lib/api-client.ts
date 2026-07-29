@@ -106,6 +106,27 @@ export type PlausibleSection = {
 export type PostHogSection = {
   events: { event: string; editor: string; count: number }[];
   daily: { date: string; count: number }[];
+  funnel: { event: string; users: number }[];
+  retention: {
+    d7: { eligible: number; returned: number; rate: number };
+    d30: { eligible: number; returned: number; rate: number };
+  };
+};
+
+export type CommercialInterestsSection = {
+  total: number;
+  byPlan: { name: string; value: number }[];
+  byRuntime: { name: string; value: number }[];
+  byUsage: { name: string; value: number }[];
+  latest: {
+    email: string;
+    plan: string;
+    runtime: string;
+    usageMode: string;
+    obstacle: string;
+    obstacleDetail: string | null;
+    createdAt: string;
+  }[];
 };
 
 export type ProjectsSection = {
@@ -128,6 +149,7 @@ export type AdminDashboardResponse = {
   plausible: PlausibleSection | SectionError;
   posthog: PostHogSection | SectionError;
   projects: ProjectsSection | SectionError;
+  interests: CommercialInterestsSection | SectionError;
 };
 
 // Takes its own token getter: the admin page fetches straight from Clerk's

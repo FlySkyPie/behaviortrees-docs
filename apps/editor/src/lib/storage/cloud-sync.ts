@@ -22,6 +22,7 @@ import {
 } from './local-projects';
 import { mergeProjects, SideState } from './sync-merge';
 import { useProjectStore } from '../../stores/useProjectStore';
+import { track } from '../analytics';
 
 // Cloud sync engine. Started/stopped by CloudSyncController when the Clerk
 // session appears/disappears; observes the local storage module and mirrors
@@ -57,6 +58,7 @@ const bumpLocalRevision = () => {
 };
 
 let active = false;
+let initialSyncPending = false;
 let unsubscribe: (() => void) | null = null;
 let onlineListener: (() => void) | null = null;
 const pushTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -160,6 +162,7 @@ function duplicateAsConflictCopy(project: B3Project): B3Project {
 export async function fullSync(): Promise<void> {
   if (!active) return;
   setStatus('syncing');
+  const initialSync = initialSyncPending;
 
   try {
     const cloudList = await fetchProjectList();
@@ -247,12 +250,23 @@ export async function fullSync(): Promise<void> {
 
     if (changedLocally) bumpLocalRevision();
     setStatus('synced');
+    track('cloud_sync_succeeded', {
+      initial_sync: initialSync,
+      pull_count: actions.pull.length,
+      push_count: actions.push.length,
+      conflict_count: actions.conflicts.length,
+    });
+    initialSyncPending = false;
   } catch (error) {
     if (isOffline(error)) {
       setStatus('offline');
+      track('cloud_sync_failed', { failure_category: 'offline' });
     } else {
       console.error('Cloud sync failed', error);
       setStatus('error');
+      track('cloud_sync_failed', {
+        failure_category: error instanceof ApiError ? 'api' : 'unknown',
+      });
     }
   }
 }
@@ -260,7 +274,9 @@ export async function fullSync(): Promise<void> {
 export function startCloudSync(getToken: () => Promise<string | null>): void {
   if (active) return;
   active = true;
+  initialSyncPending = true;
   setTokenGetter(getToken);
+  track('cloud_sync_started', { local_project_count: listLocalProjects().length });
 
   unsubscribe = subscribeLocalProjects((event) => {
     if (event.type === 'write' && event.project.id) {
@@ -279,6 +295,7 @@ export function startCloudSync(getToken: () => Promise<string | null>): void {
 export function stopCloudSync(): void {
   if (!active) return;
   active = false;
+  initialSyncPending = false;
   setTokenGetter(null);
   unsubscribe?.();
   unsubscribe = null;
