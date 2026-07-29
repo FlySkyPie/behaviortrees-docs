@@ -8,26 +8,98 @@ const posts = Object.values(
 )
     .filter((post) => !post.frontmatter.draft)
     .sort((a, b) => (a.frontmatter.order ?? 99) - (b.frontmatter.order ?? 99));
+
+const sections = [
+    {
+        title: 'Foundations',
+        description: 'Start with the mental model and the building blocks.',
+        posts: posts.filter((post) => post.frontmatter.order <= 4),
+    },
+    {
+        title: 'Tools & platforms',
+        description: 'Choose an approach for the engine or runtime you use.',
+        posts: posts.filter(
+            (post) => post.frontmatter.order > 4 && post.frontmatter.order <= 10
+        ),
+    },
+    {
+        title: 'Practice & production',
+        description: 'Build, debug, and scale trees that hold up in real projects.',
+        posts: posts.filter((post) => post.frontmatter.order > 10),
+    },
+].filter((section) => section.posts.length);
+
+const postNumber = new Map(posts.map((post, index) => [post.url, index + 1]));
+const guideId = (post) => `guide-${post.url.split('/').filter(Boolean).at(-1)}`;
 ---
 
 <ArticleLayout
     title="Learn Behavior Trees - Guides for Game AI and Robotics"
     description="Practical guides to behavior trees: core concepts, node types, blackboards, debugging, writing your own runtime, and how to use behavior trees in Unity, Unreal Engine, Python, and robotics."
+    variant="guide-index"
 >
-    <h1>Learn Behavior Trees</h1>
-    <p>
-        Behavior trees are the standard way to structure decision-making for game AI and,
-        increasingly, robotics. These guides teach the concepts from the ground up — and every
-        example can be opened in our <a href="/">free online behavior tree editor</a>, so you can
-        poke at real trees instead of just reading about them.
-    </p>
+    <header class="learn-hero">
+        <p class="eyebrow">Guide library <span aria-hidden="true">/</span> {posts.length} guides</p>
+        <h1>Learn behavior trees.<br /><span>Build smarter agents.</span></h1>
+        <p class="learn-intro">
+            A practical path from your first sequence node to production-ready game AI and
+            robotics. Every example opens in our <a href="/">free online editor</a>, so you can
+            learn by changing real trees.
+        </p>
+        <a class="start-guide" href={posts[0].url}>
+            <span>Start with the introduction</span>
+            <span aria-hidden="true">→</span>
+        </a>
+    </header>
 
-    <ul class="article-list">
-        {posts.map((post) => (
-            <li>
-                <a href={post.url}>{post.frontmatter.title}</a>
-                <p>{post.frontmatter.description}</p>
-            </li>
-        ))}
-    </ul>
+    <div class="guide-library">
+        <aside class="guide-nav" aria-label="Guides in this collection">
+            <div class="guide-nav-inner">
+                <p class="guide-nav-label">In this collection</p>
+                <ol>
+                    {
+                        posts.map((post, index) => (
+                            <li>
+                                <a href={`#${guideId(post)}`}>
+                                    <span>{String(index + 1).padStart(2, '0')}</span>
+                                    {post.frontmatter.title}
+                                </a>
+                            </li>
+                        ))
+                    }
+                </ol>
+            </div>
+        </aside>
+
+        <div class="guide-sections">
+            {
+                sections.map((section) => (
+                    <section class="guide-section">
+                        <div class="section-heading">
+                            <h2>{section.title}</h2>
+                            <p>{section.description}</p>
+                        </div>
+                        <ol class="guide-cards">
+                            {section.posts.map((post) => (
+                                <li id={guideId(post)}>
+                                    <a href={post.url}>
+                                        <span class="guide-number">
+                                            {String(postNumber.get(post.url)).padStart(2, '0')}
+                                        </span>
+                                        <span class="guide-copy">
+                                            <span class="guide-title">{post.frontmatter.title}</span>
+                                            <span class="guide-description">
+                                                {post.frontmatter.description}
+                                            </span>
+                                        </span>
+                                        <span class="guide-arrow" aria-hidden="true">↗</span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ol>
+                    </section>
+                ))
+            }
+        </div>
+    </div>
 </ArticleLayout>
