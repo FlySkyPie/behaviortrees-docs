@@ -38,23 +38,23 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 					<ul className="flex items-center gap-3 text-[13px] sm:gap-5 lg:gap-6">
 						<li className="hidden sm:block">
 							<NavLink to="/" className={navLinkClass}>
-								Home
+								首頁
 							</NavLink>
 						</li>
 						<li>
 							<NavLink to="/editor" className={navLinkClass}>
-								Editor
+								編輯器
 							</NavLink>
 						</li>
 						<li>
 							<NavLink to="/projects" className={navLinkClass}>
-								Projects
+								專案
 							</NavLink>
 						</li>
 						<li>
 							{/* Static guides site deployed alongside the app */}
 							<a href="/learn/" className="text-muted transition-colors hover:text-accent-soft">
-								Learn
+								學習
 							</a>
 						</li>
 						{CLOUD_ENABLED && <AdminNavLink />}
@@ -66,7 +66,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 						to="/settings"
 						className={(state) => `hidden md:block ${navLinkClass(state)}`}
 					>
-						Settings
+						設定
 					</NavLink>
 					{isAnalyticsEnabled() && (
 						// The PostHog survey attaches to this class and opens on click
@@ -75,7 +75,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 							className="bt-feedback-button hidden cursor-pointer items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-accent-soft md:flex"
 						>
 							<MessageSquare className="h-3.5 w-3.5" />
-							Feedback
+							意見回饋
 						</button>
 					)}
 					{CLOUD_ENABLED && <AuthControls />}
@@ -83,7 +83,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 			</header>
 
 			<div className="bg-[color-mix(in_srgb,var(--bt-accent)_14%,transparent)] border-b border-divider text-[13px] px-3 sm:px-6 py-[8px] text-center text-acc-soft">
-				This document was not created by the author of <a href="https://www.behaviortrees.com/" target="_blank" className="underline decoration-dotted underline-offset-2 hover:decoration-solid">behaviortrees</a>; it was made for my personal use.
+				此文件並非由 <a href="https://www.behaviortrees.com/" target="_blank" className="underline decoration-dotted underline-offset-2 hover:decoration-solid">behaviortrees</a> 的作者建立；而是供個人使用所製作。
 			</div>
 
 			{isEditor ? (
@@ -95,17 +95,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 						<div className="container mx-auto px-6 py-5 text-center text-[13px] text-muted">
 							&copy; {new Date().getFullYear()} behaviortrees.com ·{' '}
 							<a href="/learn/" className="text-accent-soft hover:underline">
-								Learn behavior trees
+								學習行為樹
 							</a>{' '}
 							·{' '}
 							<Link to="/pricing" className="text-accent-soft hover:underline">
-								Pricing
+								價格
 							</Link>{' '}
 							·{' '}
 							<Link to="/privacy" className="text-accent-soft hover:underline">
-								Privacy
+								隱私
 							</Link>{' '}
-							· Prefer the classic editor? It lives on at{' '}
+							· 偏好經典編輯器？它仍在{' '}
 							<a href="https://old.behaviortrees.com" className="text-accent-soft hover:underline">
 								old.behaviortrees.com
 							</a>

@@ -24,26 +24,26 @@ export const RUNTIME_OPTIONS: { value: RuntimeSegment; label: string }[] = [
   { value: 'behaviortree_cpp_ros2', label: 'BehaviorTree.CPP / ROS 2' },
   { value: 'custom_engine', label: 'Custom game engine' },
   { value: 'javascript_web', label: 'JavaScript / web' },
-  { value: 'evaluating', label: 'Still evaluating' },
+  { value: 'evaluating', label: '仍在評估中' },
   { value: 'other', label: 'Other' },
 ];
 
 export const USAGE_OPTIONS: { value: UsageMode; label: string }[] = [
-  { value: 'solo', label: 'Just me' },
-  { value: 'team_2_5', label: 'Team of 2–5' },
-  { value: 'team_6_20', label: 'Team of 6–20' },
-  { value: 'team_21_plus', label: 'Team of 21+' },
+  { value: 'solo', label: '僅我一人' },
+  { value: 'team_2_5', label: '2–5 人團隊' },
+  { value: 'team_6_20', label: '6–20 人團隊' },
+  { value: 'team_21_plus', label: '21+ 人團隊' },
 ];
 
 export const OBSTACLE_OPTIONS: { value: ProductionObstacle; label: string }[] = [
-  { value: 'runtime_integration', label: 'Runtime integration' },
-  { value: 'testing_debugging', label: 'Testing or debugging' },
-  { value: 'collaboration_review', label: 'Collaboration and review' },
-  { value: 'version_control', label: 'Version control' },
-  { value: 'tree_validation', label: 'Tree validation' },
-  { value: 'runtime_portability', label: 'Portability between runtimes' },
-  { value: 'learning', label: 'Learning behavior trees' },
-  { value: 'other', label: 'Other' },
+  { value: 'runtime_integration', label: '執行環境整合' },
+  { value: 'testing_debugging', label: '測試或除錯' },
+  { value: 'collaboration_review', label: '協作與審查' },
+  { value: 'version_control', label: '版本控制' },
+  { value: 'tree_validation', label: '樹驗證' },
+  { value: 'runtime_portability', label: '跨執行環境的可攜性' },
+  { value: 'learning', label: '學習行為樹' },
+  { value: 'other', label: '其他' },
 ];
 
 export async function submitCommercialInterest(

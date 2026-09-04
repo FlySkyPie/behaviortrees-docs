@@ -79,16 +79,16 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-3xl font-medium mb-8">Settings</h1>
+      <h1 className="text-3xl font-medium mb-8">設定</h1>
 
       <div className="space-y-10">
         {/* Appearance Settings */}
         <section className="card">
-          <h2 className="text-xl font-medium mb-4">Appearance</h2>
+          <h2 className="text-xl font-medium mb-4">外觀</h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Theme</label>
+              <label className="block text-sm font-medium mb-2">主題</label>
               <div className="flex space-x-2">
                 {themeOptions.map(option => (
                   <Button
@@ -107,11 +107,11 @@ const SettingsPage: React.FC = () => {
 
         {/* Editor Settings */}
         <section className="card">
-          <h2 className="text-xl font-medium mb-4">Editor</h2>
+          <h2 className="text-xl font-medium mb-4">編輯器</h2>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Auto-save projects</label>
+              <label className="text-sm font-medium">自動儲存專案</label>
               <Toggle
                 checked={autoSave}
                 onChange={handleAutoSaveChange}
@@ -120,7 +120,7 @@ const SettingsPage: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Show grid in editor</label>
+              <label className="text-sm font-medium">在編輯器中顯示網格</label>
               <Toggle
                 checked={showGrid}
                 onChange={handleShowGridChange}
@@ -133,25 +133,25 @@ const SettingsPage: React.FC = () => {
         {/* Project Details */}
         {project && (
           <section className="card">
-            <h2 className="text-xl font-medium mb-4">Current Project</h2>
+            <h2 className="text-xl font-medium mb-4">目前專案</h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Project Name</label>
+                <label className="block text-sm font-medium mb-1">專案名稱</label>
                 <div className="px-4 py-2 border border-border rounded-md bg-inset">
                   {project.name}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label className="block text-sm font-medium mb-1">描述</label>
                 <div className="px-4 py-2 border border-border rounded-md bg-inset min-h-16 text-muted">
-                  {project.description || "No description"}
+                  {project.description || "無描述"}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Project ID</label>
+                <label className="block text-sm font-medium mb-1">專案 ID</label>
                 <div className="px-4 py-2 border border-border rounded-md bg-inset font-mono text-sm text-muted">
                   {project.id}
                 </div>

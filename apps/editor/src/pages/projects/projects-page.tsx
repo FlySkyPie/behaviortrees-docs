@@ -140,13 +140,13 @@ const ProjectsPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-medium">Projects</h1>
+        <h1 className="text-3xl font-medium">專案</h1>
         <div className="flex space-x-4">
           <Button 
             onClick={() => setIsCreating(true)}
             className="flex items-center gap-2"
           >
-            <Plus size={18} /> New Project
+            <Plus size={18} /> 新專案
           </Button>
           <div className="relative">
             <Button 
@@ -154,7 +154,7 @@ const ProjectsPage: React.FC = () => {
               className="flex items-center gap-2"
               onClick={() => document.getElementById('file-input')?.click()}
             >
-              Import Project
+              匯入專案
             </Button>
             <input 
               type="file" 
@@ -169,32 +169,32 @@ const ProjectsPage: React.FC = () => {
 
       {isCreating && (
         <div className="card mb-8">
-          <h2 className="text-xl font-medium mb-4">Create New Project</h2>
+          <h2 className="text-xl font-medium mb-4">建立新專案</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Project Name</label>
+              <label className="block text-sm font-medium mb-1">專案名稱</label>
               <input
                 type="text"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                placeholder="My Behavior Tree Project"
+                placeholder="我的行為樹專案"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Description</label>
+              <label className="block text-sm font-medium mb-1">描述</label>
               <textarea
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
-                placeholder="Description of your project"
+                placeholder="專案描述"
                 rows={3}
               />
             </div>
             <div className="flex justify-end space-x-3">
               <Button variant="outline" onClick={() => setIsCreating(false)}>
-                Cancel
+                取消
               </Button>
               <Button onClick={handleCreateProject}>
-                Create Project
+                建立專案
               </Button>
             </div>
           </div>
@@ -226,14 +226,14 @@ const ProjectsPage: React.FC = () => {
                     )}
                     {project?.id === item.id && (
                       <span className="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border border-accent bg-accent-wash text-accent-soft">
-                        Open
+                        開啟
                       </span>
                     )}
                   </div>
                   <p className="text-muted mt-1">{item.description}</p>
                   <div className="flex mt-2 text-sm text-faint">
-                    <span className="mr-4">Trees: {Object.keys(item.trees).length}</span>
-                    <span>Last updated: {new Date(item.updatedAt).toLocaleDateString()}</span>
+                    <span className="mr-4">樹：{Object.keys(item.trees).length}</span>
+                    <span>最後更新：{new Date(item.updatedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <div className="flex space-x-2">
@@ -241,10 +241,10 @@ const ProjectsPage: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      title="Close project"
+                      title="關閉專案"
                       onClick={() => {
                         closeProject();
-                        toast.success('Project closed');
+                        toast.success('專案已關閉');
                       }}
                     >
                       <X size={16} />
@@ -253,7 +253,7 @@ const ProjectsPage: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      title="Open project"
+                      title="開啟專案"
                       onClick={() => {
                         loadProject(item);
                         navigate('/editor');
@@ -265,7 +265,7 @@ const ProjectsPage: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    title="Rename project"
+                    title="重新命名專案"
                     onClick={() => {
                       setRenamingId(item.id);
                       setRenameValue(item.name);
@@ -273,22 +273,22 @@ const ProjectsPage: React.FC = () => {
                   >
                     <Pencil size={16} />
                   </Button>
-                  <Button variant="ghost" size="sm" title="Export project" onClick={() => handleExportProject(item)}>
+                  <Button variant="ghost" size="sm" title="匯出專案" onClick={() => handleExportProject(item)}>
                     <Download size={16} />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    title="Delete project"
+                    title="刪除專案"
                     className="text-danger-soft hover:bg-danger/10"
                     onClick={() => {
-                      if (!confirm(`Delete project "${item.name}"?`)) return;
+                      if (!confirm(`刪除專案「${item.name}」？`)) return;
                       removeLocalProject(item.id);
                       if (project?.id === item.id) {
                         closeProject();
                       }
                       setProjects(prev => prev.filter(p => p.id !== item.id));
-                      toast.success('Project deleted');
+                      toast.success('專案已刪除');
                     }}
                   >
                     <Trash size={16} />
@@ -300,12 +300,12 @@ const ProjectsPage: React.FC = () => {
         </div>
       ) : (
         <div className="card text-center">
-          <h2 className="text-xl font-medium mb-2">No Projects Yet</h2>
+          <h2 className="text-xl font-medium mb-2">尚無專案</h2>
           <p className="text-muted mb-6">
-            Get started by creating your first behavior tree project.
+            開始建立您的第一個行為樹專案。
           </p>
           <Button onClick={() => setIsCreating(true)}>
-            Create Your First Project
+            建立您的第一個專案
           </Button>
         </div>
       )}
