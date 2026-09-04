@@ -82,6 +82,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 				</div>
 			</header>
 
+			<div className="bg-[color-mix(in_srgb,var(--bt-accent)_14%,transparent)] border-b border-divider text-[13px] px-3 sm:px-6 py-[8px] text-center text-acc-soft">
+				This document was not created by the author of <a href="https://www.behaviortrees.com/" target="_blank" className="underline decoration-dotted underline-offset-2 hover:decoration-solid">behaviortrees</a>; it was made for my personal use.
+			</div>
+
 			{isEditor ? (
 				<main className="flex min-h-0 flex-1 flex-col">{children}</main>
 			) : (

@@ -132,6 +132,10 @@ const jsonLd = isArticle
         </nav>
     </header>
 
+    <div class="personal-banner">
+        This document was not created by the author of <a href="https://www.behaviortrees.com/" target="_blank" class="banner-link">behaviortrees</a>; it was made for my personal use.
+    </div>
+
     <script is:inline>
         (function () {
             var btn = document.getElementById('theme-toggle');
@@ -297,6 +301,24 @@ const jsonLd = isArticle
     }
 
     /* — header — */
+    .personal-banner {
+        background: color-mix(in srgb, var(--bt-accent) 14%, transparent);
+        border-bottom: 1px solid var(--bt-divider);
+        color: var(--acc-soft);
+        font-size: 13px;
+        padding: 8px 2rem;
+        text-align: center;
+    }
+    .personal-banner .banner-link {
+        color: var(--acc-soft);
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        text-underline-offset: 2px;
+    }
+    .personal-banner .banner-link:hover {
+        text-decoration-style: solid;
+    }
+
     .site-header {
         position: sticky;
         top: 0;
