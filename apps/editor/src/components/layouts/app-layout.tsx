@@ -57,11 +57,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 								Learn
 							</a>
 						</li>
-						<li>
-							<NavLink to="/pricing" className={navLinkClass}>
-								Pricing
-							</NavLink>
-						</li>
 						{CLOUD_ENABLED && <AdminNavLink />}
 					</ul>
 				</nav>

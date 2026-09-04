@@ -10,7 +10,6 @@ import EditorPage from './pages/editor/editor-page';
 import ProjectsPage from './pages/projects/projects-page';
 import SettingsPage from './pages/settings/settings-page';
 import AdminPage from './pages/admin/admin-page';
-import PricingPage from './pages/pricing/pricing-page';
 import PrivacyPage from './pages/privacy/privacy-page';
 import ProductAnalyticsTracker from './components/analytics/product-analytics-tracker';
 
@@ -39,7 +38,6 @@ function App() {
 					<Route path="/editor" element={<EditorPage />} />
 					<Route path="/projects" element={<ProjectsPage />} />
 					<Route path="/settings" element={<SettingsPage />} />
-					<Route path="/pricing" element={<PricingPage />} />
 					<Route path="/privacy" element={<PrivacyPage />} />
 					<Route path="/admin" element={<AdminPage />} />
 				</Routes>
