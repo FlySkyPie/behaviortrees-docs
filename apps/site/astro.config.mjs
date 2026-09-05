@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { rehypeBaseLinks } from './src/rehype-base-links.js';
 
 const SITE = 'https://www.behaviortrees.com';
 
@@ -36,5 +37,10 @@ export default defineConfig({
     ],
     build: {
         format: 'directory',
+    },
+    markdown: {
+        rehypePlugins: [
+            [rehypeBaseLinks, process.env.GH_PAGES_BASE || '/'],
+        ],
     },
 });
