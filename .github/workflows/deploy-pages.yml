@@ -1,0 +1,75 @@
+# Build the React editor + Astro guides site, merge them, and deploy to
+# GitHub Pages. Mirrors the merge logic in build-deploy.sh (Netlify) and
+# vercel.json (Vercel), without the classic gulp editor.
+#
+# Local-only mode: Clerk auth and the sync API are disabled (no Vercel
+# functions, no VITE_CLERK_PUBLISHABLE_KEY). The editor works fully
+# for local projects and example trees; cloud features are hidden.
+#
+# Required GitHub Pages setting:
+#   Source -> "GitHub Actions" (not a branch/folder)
+#
+# If using a project page (user.github.io/repo), the absolute asset paths
+# in index.html will break — use a custom domain instead.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build editor + site
+        env:
+          VITE_CLERK_PUBLISHABLE_KEY: ''
+        run: pnpm exec turbo run build --filter=@behaviortrees/editor --filter=@behaviortrees/site
+
+      - name: Merge site into editor dist
+        run: cp -R apps/site/dist/. apps/editor/dist/
+
+      # GitHub Pages doesn't support SPA fallback routing. Copying
+      # index.html as 404.html makes the React app load when users
+      # directly visit a deep link (e.g. /projects/xyz).
+      - name: Add SPA 404 fallback
+        run: cp apps/editor/dist/index.html apps/editor/dist/404.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/editor/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
