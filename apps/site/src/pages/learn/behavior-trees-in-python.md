@@ -1,24 +1,20 @@
 ---
+lang: zh_TW
 layout: ../../layouts/ArticleLayout.astro
-title: "Behavior Trees in Python: py_trees, ROS 2, and Quick Prototypes"
-description: "How to build behavior trees in Python with py_trees — behaviours, composites, blackboards, and ASCII visualization — plus py_trees_ros for ROS 2 robots and when Python is (and isn't) the right runtime."
+title: "Python 中的行為樹：py_trees、ROS 2 與快速原型"
+description: "如何使用 py_trees 在 Python 中建構行為樹——行為節點、組合節點、黑板與 ASCII 視覺化——以及適用於 ROS 2 機器人的 py_trees_ros，還有 Python 何時是（以及何時不是）合適的執行環境。"
 pubDate: "2026-07-28"
 order: 10
 ---
+lang: zh_TW
 
-# Behavior Trees in Python
+# Python 中的行為樹
 
-Python won't be ticking the enemies in your 60 fps action game — but for robotics,
-simulations, agent prototypes, and *learning how behavior trees actually work*, it's hard
-to beat. The ecosystem has one clear standard library, **py_trees**, and a first-class
-ROS 2 companion, **py_trees_ros**, maintained from the same lineage as the ROS navigation
-work covered in [Behavior Trees in Robotics](/learn/behavior-trees-in-robotics/).
+Python 不會為你的 60 fps 動作遊戲驅動敵人的行為——但對於機器人學、模擬、代理原型，以及**學習行為樹的實際運作原理**來說，它生來就是絕佳選擇。這個生態系統有一套明確的標準函式庫 **py_trees**，以及一個一流的 ROS 2 配套函式庫 **py_trees_ros**，兩者與[行為樹在機器人學中的應用](/learn/behavior-trees-in-robotics/)中所介紹的 ROS 導航功能出自同源。
 
-## py_trees in five minutes
+## 五分鐘快速認識 py_trees
 
-Everything in py_trees is a `Behaviour` with an `update()` method returning a status —
-the same Success/Failure/Running contract from
-[the node reference](/learn/behavior-tree-nodes-explained/):
+py_trees 的一切都由 `Behaviour` 構成，其 `update()` 方法會回傳一個狀態——與[節點參考](/learn/behavior-tree-nodes-explained/)中相同的 Success/Failure/Running 合約：
 
 ```python
 import py_trees
@@ -46,23 +42,18 @@ while True:
     tree.tick()
 ```
 
-The pieces map directly onto standard BT vocabulary:
+各個元件直接對應到標準 BT 詞彙：
 
-| Concept | py_trees |
+| 概念 | py_trees |
 |---------|----------|
 | Sequence / Selector | `composites.Sequence` / `composites.Selector` |
-| Memory variants | The same classes with `memory=True` |
-| Parallel | `composites.Parallel` with a success policy |
-| Decorators | `decorators.Inverter`, `Retry`, `Timeout`, `OneShot`, … |
-| [Blackboard](/learn/behavior-tree-blackboard/) | `blackboard.Client` with per-key read/write registration |
-| Long-running actions | Return `RUNNING`; `initialise()`/`terminate()` hooks fire on enter/exit |
+| 記憶體變體 | 同一類別，設定 `memory=True` |
+| Parallel | `composites.Parallel` 搭配成功策略 |
+| 裝飾節點 | `decorators.Inverter`、`Retry`、`Timeout`、`OneShot`、…… |
+| [黑板](/learn/behavior-tree-blackboard/) | `blackboard.Client`，支援每個鍵的讀寫註冊 |
+| 長時間執行的動作 | 回傳 `RUNNING`；進入/離開時觸發 `initialise()` / `terminate()` 鉤子 |
 
-Two details are unusually well done. The **blackboard requires behaviours to register
-which keys they read and write** — the "treat keys as an API" discipline from
-[the blackboard guide](/learn/behavior-tree-blackboard/), enforced by the library. And
-**visualization is built in**: `py_trees.display.ascii_tree(root)` prints the tree with
-live per-node status, which makes the tick semantics visible in a way no amount of reading
-achieves.
+有兩個細節做得特別出色。**黑板要求行為節點註冊它們讀取和寫入的鍵**——這正是[黑板指南](/learn/behavior-tree-blackboard/)中所提倡的「將鍵視為 API」的紀律，並由函式庫強制執行。此外，**視覺化功能內建其中**：`py_trees.display.ascii_tree(root)` 會列印出帶有即時節點狀態的樹狀圖，讓 tick 語義變得一目瞭然，遠勝於單純閱讀文件。
 
 ```text
 [o] Brain [*]
@@ -72,35 +63,22 @@ achieves.
     [-] Patrol
 ```
 
-## py_trees_ros: trees on real robots
+## py_trees_ros：在真實機器人上運行的行為樹
 
-For ROS 2, **py_trees_ros** wraps the same core with the robotics essentials: behaviours
-that call ROS actions and services asynchronously, subscribers that mirror topics into the
-blackboard, and snapshot publishing so the **py_trees_ros_viewer** GUI can watch a live
-tree over the network — the same "watch the tree run" workflow Groot2 provides for
-BehaviorTree.CPP. Python's tick rates (typically 10–50 Hz for mission logic) are a
-non-issue for task orchestration; the hard real-time control loops live below the tree in
-controllers anyway.
+對於 ROS 2，**py_trees_ros** 以機器人學必備功能包裝了相同的核心：能以非同步方式呼叫 ROS action 和 service 的行為節點、能將主題內容鏡像到黑板的訂閱者，以及用於快照發佈的機制，讓 **py_trees_ros_viewer** GUI 可以透過網路監控即時的行為樹——這與 Groot2 為 BehaviorTree.CPP 提供的「觀看行為樹運行」工作流程相同。Python 的 tick 頻率（任務邏輯通常為 10–50 Hz）對任務編排來說不成問題；真正的硬即時控制迴圈無論如何都位於樹下方的控制器中。
 
-If your stack is C++/Nav2, use [BehaviorTree.CPP](/learn/behavior-trees-in-robotics/); if
-it's Python-first — research platforms, quick field tooling, coursework — py_trees is the
-standard.
+如果你的技術棧是 C++/Nav2，請使用 [BehaviorTree.CPP](/learn/behavior-trees-in-robotics/)；如果是以 Python 為主的技術棧——研究平台、快速現場工具開發、課程作業——py_trees 就是標準選擇。
 
-## When Python is the wrong runtime (and it still helps)
+## 當 Python 不是合適的執行環境時（但它仍然有用）
 
-For a shipping game you'll execute trees in
-[Unity](/learn/behavior-trees-in-unity/), [Unreal](/learn/behavior-trees-in-unreal-engine/),
-or [Godot](/learn/behavior-trees-in-godot/) — but a 50-line Python prototype is still the
-fastest way to validate tree *logic* before touching engine code. Stub every action with a
-counter, tick the tree in a loop, print the ascii tree, and watch whether your priorities
-and guards actually do what you intended. Logic bugs cost minutes here and hours in-engine.
+對於一款上市的遊戲，你會分別在 [Unity](/learn/behavior-trees-in-unity/)、[Unreal](/learn/behavior-trees-in-unreal-engine/) 或 [Godot](/learn/behavior-trees-in-godot/) 中執行行為樹——但一個 50 行的 Python 原型仍然是驗證樹**邏輯**最快的方式，然後再接觸引擎程式碼。用計數器模擬每個動作，在迴圈中 tick 行為樹，印出 ASCII 樹狀圖，然後觀察你的優先級和守衛條件是否真的如你預期般運作。邏輯錯誤在這裡只需花費幾分鐘，而在引擎內部則需要數小時。
 
-The same goes for design: sketch the structure visually first, then write the Python.
+設計階段也是如此：先在視覺上勾勒樹的結構，然後再用 Python 實作。
 
-<a class="try-editor" href="/?example=robot-pick-and-place">▶ Explore the pick-and-place tree in the editor</a>
+<a class="try-editor" href="/?example=robot-pick-and-place">▶ 在編輯器中探索取放機器人行為樹</a>
 
-## Related guides
+## 相關指南
 
-- [Behavior Trees in Robotics: BehaviorTree.CPP, ROS 2, and Nav2](/learn/behavior-trees-in-robotics/)
-- [How to Write a Behavior Tree from Scratch](/learn/how-to-implement-a-behavior-tree/)
-- [Behavior Tree Blackboards](/learn/behavior-tree-blackboard/)
+- [行為樹在機器人學中的應用：BehaviorTree.CPP、ROS 2 與 Nav2](/learn/behavior-trees-in-robotics/)
+- [如何從零實作行為樹](/learn/how-to-implement-a-behavior-tree/)
+- [行為樹黑板](/learn/behavior-tree-blackboard/)

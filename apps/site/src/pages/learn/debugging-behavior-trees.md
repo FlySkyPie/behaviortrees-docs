@@ -1,116 +1,80 @@
 ---
+lang: zh_TW
 layout: ../../layouts/ArticleLayout.astro
-title: "Debugging Behavior Trees: The 6 Classic Mistakes"
-description: "Why your sequence restarts every tick, why the tree won't switch branches, why the agent flip-flops between two behaviors — the recurring behavior tree bugs, their causes, and how to fix each one."
+title: "除錯行為樹：6 個經典錯誤"
+description: "為什麼你的序列每幀都從頭重啟、為什麼樹不會切換分支、為什麼 agent 在兩個行為之間反覆橫跳——那些反覆出現的行為樹錯誤、它們的成因，以及如何修正每一個。"
 pubDate: "2026-07-28"
 order: 12
 ---
+lang: zh_TW
 
-# Debugging Behavior Trees
+# 除錯行為樹
 
-Behavior tree bugs are rarely in the leaves. `MoveTo` works, `Attack` works — and the agent
-still stands there vibrating, or walks through combat like it's blind. That's because most
-BT bugs are *structural*: the tick semantics doing exactly what you told them to, which
-isn't what you meant. The good news is that the same six mistakes account for nearly all of
-it. (Tick semantics fuzzy? Keep [the node reference](/learn/behavior-tree-nodes-explained/)
-open beside this.)
+行為樹的臭蟲很少出現在葉節點。`MoveTo` 能用、`Attack` 能用——但 agent
+依然站在原地抖動，或是在戰鬥中視若無睹地走過去。這是因為大部分
+BT 的臭蟲都是*結構性*的：tick 語義確實執行了你的指令，只是那不是你原本的意思。
+好消息是，幾乎所有問題都可以歸結於同樣的六個錯誤。（對 tick 語義還不熟？請將
+[節點參考文件](/learn/behavior-tree-nodes-explained/) 放在旁邊對照閱讀。）
 
-## 1. "My sequence restarts from the beginning every tick"
+## 1. 「我的序列每幀都從頭重啟」
 
-The agent walks to a waypoint, waits… and instead of advancing, walks to the same waypoint
-forever.
+agent 走到一個路徑點，等待……然後不是繼續前進，而是永遠走向同一個路徑點。
 
-A plain **Sequence re-ticks from its first child every tick**. If that first child is an
-action that succeeds again ("move to waypoint" — already there, Success), the sequence
-grinds through the same prefix each tick and never *progresses*. That reactive restart is
-what you want for guarded branches (`In Range? → Attack` should re-check range!) and wrong
-for step-by-step procedures.
+一般的 **Sequence 每回合都會從第一個子節點重新 tick**。如果第一個子節點是一個會再次成功的動作（「移動到路徑點」——已經到達，回傳 Success），那麼序列每幀都會重複處理相同的前綴，永遠不會*推進*。這種反應式重啟正是你對守衛分支（`In Range? → Attack` 應該重新檢查範圍！）所需要的，但對逐步程序而言卻是錯誤的。
 
-**Fix:** procedural checklists get a **memory** composite (`MemSequence` / "with memory");
-reactive guards keep the plain one. The rule of thumb: *guard → plain, checklist → memory.*
+**修正：** 程序性的檢查清單使用**記憶型**複合節點（`MemSequence` / "with memory"）；反應式守衛則保留一般序列。經驗法則：*守衛 → 一般，檢查清單 → 記憶型。*
 
-## 2. "The tree never switches to the higher-priority branch"
+## 2. 「樹永遠不會切換到優先級更高的分支」
 
-The player walks right up to a patrolling enemy and… it finishes its patrol route.
+玩家直接走到一個巡邏中的敵人面前……而它繼續走完巡邏路線。
 
-Three common causes, in order of likelihood:
+三種常見原因，按可能性排列：
 
-- **A memory composite at the wrong level.** A `MemSelector` at the root remembers it
-  chose Patrol and skips re-evaluating Combat until patrol finishes. Roots that must stay
-  reactive should be plain selectors.
-- **In Unreal: no observer aborts.** UE trees don't re-evaluate from the root; decorators
-  must have Observer Aborts set (typically *Lower Priority*) to yank execution out of a
-  running branch. This is the #1 UE-specific confusion — see
-  [Behavior Trees in Unreal](/learn/behavior-trees-in-unreal-engine/).
-- **A Running child pinning the tree** in frameworks/configurations that resume the
-  running node directly instead of re-descending from the root.
+- **在錯誤層級放置了記憶型複合節點。** 根節點的 `MemSelector` 記住了它選擇了 Patrol，並跳過重新評估 Combat，直到 patrol 結束。必須保持反應式的根節點應該使用一般選擇器。
+- **在 Unreal 中：沒有設定 observer abort。** UE 的樹不會從根節點重新評估；decorator 必須設定 Observer Aborts（通常是 *Lower Priority*）才能將執行從正在執行的分支中拉出。這是 UE 中最常見的困惑——請參閱
+  [Unreal Engine 中的行為樹](/learn/behavior-trees-in-unreal-engine/)。
+- **正在執行中的子節點鎖住了整棵樹**——在一些框架/設定中，系統會直接繼續執行該節點，而不是從根節點重新向下遍歷。
 
-## 3. "A condition is secretly an action"
+## 3. 「條件判斷其實是動作」
 
-`Is Door Locked?` that *tries the handle* — mutating the world, taking time, playing a
-sound. Conditions get re-evaluated constantly by reactive composites; any side effect in
-one fires on every tick from every branch that checks it.
+`Is Door Locked?` 卻去*轉門把*——改變世界狀態、消耗時間、播放音效。反應式複合節點會不斷地重新評估條件；任何副作用都會在每次 tick 時從所有檢查該條件分支觸發。
 
-**Fix:** conditions read state and return instantly, Success or Failure, never Running —
-nothing else. If a check is expensive (raycasts, pathfinding), run it in a sensor on its
-own schedule and cache the result in the
-[blackboard](/learn/behavior-tree-blackboard/); the condition just reads the cache.
+**修正：** 條件判斷只讀取狀態並立即回傳，Success 或 Failure，永遠不回傳 Running——不做其他事。如果某個檢查很昂貴（射線檢測、路徑搜尋），就讓感測器按自己的排程執行，並將結果快取在
+[黑板](/learn/behavior-tree-blackboard/) 中；條件判斷只需要讀取快取資料即可。
 
-## 4. "The decorator is attached to the wrong node"
+## 4. 「Decorator 掛錯了節點」
 
-A cooldown on the *range check* starts its clock every time the check fails; a cooldown on
-the *attack sequence* does what you meant. An inverter around a *sequence* inverts the
-whole branch's result, not the one condition you were thinking of. Decorator misplacement
-compiles fine, looks fine at a glance, and quietly shifts semantics —
-[the examples page](/learn/behavior-tree-examples/) calls this out for cooldown-gated
-specials specifically.
+冷卻掛在*範圍檢查*上，每當檢查失敗就重新計時；冷卻掛在*攻擊序列*上才是你要的效果。反相器掛在*序列*外面會反轉整個分支的結果，而不是你以為的那一個條件。Decorator 放錯位置仍然能編譯通過，乍看之下也沒問題，但會悄悄地改變語義——
+[範例頁面](/learn/behavior-tree-examples/) 針對冷卻控制特殊技能的情況特別說明了這一點。
 
-**Fix:** for each decorator, say out loud *exactly* which result it transforms. If the
-sentence surprises you, move it. The
-[cooldown-specials example](/?example=cooldown-specials) shows the correct placement —
-cooldown around the whole attack sequence.
+**修正：** 對每個 decorator，大聲說出*到底*它轉換的是哪個結果。如果這句話讓你感到意外，就把它移走。[冷卻特殊技能範例](/?example=cooldown-specials) 展示了正確的放置方式——冷卻放在整個攻擊序列外層。
 
-## 5. "Everything returns Success instantly"
+## 5. 「所有東西都瞬間回傳 Success」
 
-The agent "patrols" by teleport: every action completes in one tick because nothing
-returns **Running**. New implementers write actions like functions — do the thing, return.
-But `MoveTo` is dozens of ticks of work; returning Success on tick one means the tree
-races to the end every frame.
+agent 用「瞬間移動」來巡邏：每個動作一幀就完成，因為沒有任何東西回傳 **Running**。新手實作者把動作寫得像函式一樣——做完事情就回傳。但 `MoveTo` 需要幾十幀的工作量；在第一幀就回傳 Success 意味著樹每幀都會直接跑到結尾。
 
-**Fix:** long actions return Running until genuinely done. If you're
-[writing your own runtime](/learn/how-to-implement-a-behavior-tree/), this is the first
-thing to get right — and the first thing to test.
+**修正：** 長時間的動作應回傳 Running，直到真正完成。如果你正在
+[撰寫自己的執行時期](/learn/how-to-implement-a-behavior-tree/)，這是第一件要搞對的事——也是第一件要測試的事。
 
-## 6. "The agent flip-flops between two branches"
+## 6. 「Agent 在兩個分支之間反覆橫跳」
 
-Health 30 → flee; fleeing breaks contact, health regen ticks to 31 → fight; take a hit →
-flee… The tree is *correctly* re-evaluating a boundary condition that keeps crossing its
-threshold.
+血量 30 → 逃跑；逃跑中脫離接觸，血量恢復到 31 → 戰鬥；受到攻擊 → 逃跑……樹*正確地*重新評估一個不斷越過閾值的邊界條件。
 
-**Fix:** hysteresis. Enter the flee state below 30 but only leave it above 60 — easiest as
-a blackboard flag a sensor sets and clears at different thresholds, with the tree checking
-the flag. Oscillation is a *design* smell, not a tick bug; hard cutoffs on continuously
-varying values always thrash. (The
-[survival-override example](/?example=survival-override) is this exact flee/fight shape —
-open it and consider where the hysteresis would go.)
+**修正：** 滯後效應（hysteresis）。在低於 30 時進入逃跑狀態，但只在低於 60 時才維持逃跑，高於 60 才離開——最簡單的做法是由感測器在不同閾值設定和清除黑板旗標，而樹則檢查該旗標。震盪是*設計*上的問題，而不是 tick 的臭蟲；對連續變化數值設定硬邊界閾值一定會導致抖動。（
+[生存覆寫範例](/?example=survival-override) 正是這種逃跑/戰鬥的結構——打開它，思考滯後效應應該放在哪裡。）
 
-## The meta-fix: watch the tree run
+## 終極修正法：觀察樹的運行
 
-All six bugs become obvious the moment you can *see* per-node status live — which is why
-every serious ecosystem grew a viewer (UE's in-editor debugger, Groot2 for
-[BehaviorTree.CPP](/learn/behavior-trees-in-robotics/), ascii trees in
-[py_trees](/learn/behavior-trees-in-python/)). Log status *changes* rather than statuses
-(the tick spam drowns you otherwise), and test subtrees in isolation before grafting them
-into the full brain.
+這六個錯誤只要你能*即時*看到每個節點的狀態就會一目瞭然——這就是為什麼每個成熟的生態系都發展出了視覺化工具（UE 的編輯器內除錯器、給
+[BehaviorTree.CPP](/learn/behavior-trees-in-robotics/) 的 Groot2、
+[py_trees](/learn/behavior-trees-in-python/) 的 ascii 樹）。記錄狀態的*變化*而非狀態本身（否則 tick 的資訊轟炸會淹沒你），並且在將子樹嫁接到完整的大腦之前先獨立測試它們。
 
-And before any of that: check the structure itself. Rebuild the suspect branch in the
-[free online editor](/) where you can see the whole shape at once — misplaced decorators
-and missing guards usually jump out visually.
+而在這一切之前：先檢查結構本身。在[免費線上編輯器](/) 中重建可疑的分支，你就能一眼看出整體結構——放錯位置的 decorator 和遺漏的守衛通常會直接跳出來。
 
-<a class="try-editor" href="/?example=enemy-patrol">▶ Open a known-good tree to compare against</a>
+<a class="try-editor" href="/?example=enemy-patrol">▶ 開啟一個已知正確的樹來比對</a>
 
-## Related guides
+## 相關指南
 
-- [Sequence, Selector, and Decorator Nodes Explained](/learn/behavior-tree-nodes-explained/)
-- [Behavior Tree Blackboards](/learn/behavior-tree-blackboard/)
-- [Behavior Tree Examples: Common Game AI Patterns](/learn/behavior-tree-examples/)
+- [Sequence、Selector 與 Decorator 節點解說](/learn/behavior-tree-nodes-explained/)
+- [行為樹黑板](/learn/behavior-tree-blackboard/)
+- [行為樹範例：常見遊戲 AI 模式](/learn/behavior-tree-examples/)

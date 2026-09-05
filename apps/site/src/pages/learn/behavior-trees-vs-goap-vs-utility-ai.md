@@ -1,113 +1,74 @@
 ---
+lang: zh_TW
 layout: ../../layouts/ArticleLayout.astro
-title: "Behavior Trees vs GOAP vs Utility AI: Picking an Architecture"
-description: "The three mainstream game AI architectures compared honestly — authored behavior trees, GOAP planners, and utility scoring — with the trade-offs, famous examples, and the hybrids real games actually ship."
+title: "行為樹 vs GOAP vs Utility AI：如何選擇架構"
+description: "三種主流遊戲 AI 架構的誠實比較——人工編寫的行為樹、GOAP 規劃器與效用評分——涵蓋各自的取捨、經典範例，以及實際遊戲中採用的混合方案。"
 pubDate: "2026-07-28"
 draft: true
 order: 5
 ---
+lang: zh_TW
 
-# Behavior Trees vs GOAP vs Utility AI
+# 行為樹 vs GOAP vs Utility AI
 
-<div class="disclosure">Disclosure: some links on this page are affiliate links. If you buy
-through them we may earn a commission at no extra cost to you. It helps keep the free editor
-running.</div>
+<div class="disclosure">揭露聲明：本頁部分連結為推薦連結。若您透過這些連結購買商品，我們可能獲得少量佣金，但您無需額外付費。這有助於維持免費編輯器的運作。</div>
 
-Once you've ruled out a plain state machine (see
-[Behavior Trees vs Finite State Machines](/learn/behavior-trees-vs-state-machines/)), three
-architectures dominate the conversation: behavior trees, GOAP, and utility AI. All three
-have shipped in acclaimed games. They differ on one axis that matters more than any feature
-list: **who decides the sequence of actions — you, at design time, or the system, at
-runtime?**
+當你排除了單純的有限狀態機後（參閱
+[行為樹與有限狀態機](/learn/behavior-trees-vs-state-machines/)），
+有三種架構主導了討論：行為樹、GOAP 與 utility AI。這三種架構都曾在廣受好評的遊戲中實際採用。它們在一個比任何功能列表都更重要的軸線上有所區別：**由誰決定行動的順序——你，在設計階段，還是系統，在執行階段？**
 
-## The 30-second versions
+## 30 秒速覽
 
-A **behavior tree** is an *authored* priority structure: you write down what to try and in
-what order, and the tree reactively picks the highest-priority branch whose conditions
-hold. ([Full introduction here](/learn/what-is-a-behavior-tree/).)
+**行為樹**是一種*人工編寫*的優先級結構：你寫下要做什麼以及順序，然後樹會根據條件是否成立，被動地選擇優先級最高的分支。（[完整介紹在此](/learn/what-is-a-behavior-tree/)。）
 
-**GOAP** (Goal-Oriented Action Planning) gives the agent a *goal* ("player is dead") and a
-pile of actions, each with preconditions and effects ("Shoot: requires loaded weapon,
-causes damage"). A planner then *searches* for an action sequence that reaches the goal —
-at runtime, per situation. Jeff Orkin's AI for *F.E.A.R.* (2005) made the technique famous,
-and its soldiers' flanking and improvisation are still cited today.
+**GOAP**（目標導向行動規劃）賦予代理一個*目標*（「玩家已死亡」）和一組行動，每個行動都有前提條件與效果（「射擊：需要已裝填武器，造成傷害」）。規劃器接著*搜尋*一組能達成目標的行動序列——在執行階段，針對每種情境即時規劃。Jeff Orkin 為《F.E.A.R.》（2005）開發的 AI 讓這項技術聲名大噪，其士兵的側翼包抄與即興應變至今仍為人所樂道。
 
-**Utility AI** scores every possible action continuously — each action gets a curve-driven
-number from current state (hunger, distance, ammo, threat) and the best score wins. It's
-how *The Sims* weighs a Sim's needs, and Dave Mark's "Infinite Axis" formulation of it is
-widely used for ambient and sim-heavy AI.
+**Utility AI** 持續對每個可能的行動進行評分——每個行動根據當前狀態（飢餓度、距離、彈藥量、威脅程度）經由曲線計算出一個數值，由最高分者勝出。這就是《模擬市民》衡量角色需求的方式，Dave Mark 的「Infinite Axis」公式廣泛應用於環境 AI 與模擬密集型 AI。
 
-## What each one buys you — and costs you
+## 各架構的優點與代價
 
-**Behavior trees** buy *legibility and control*. The tree is the documentation; designers
-can read it, tooling can visualize it, and QA can reproduce it. The cost: a BT will never
-surprise you. If you didn't author a branch for a situation, the agent has no answer to it.
+**行為樹**帶來*可讀性與可控性*。樹本身就是文件；設計師能看懂，工具能視覺化，品管能重現問題。代價是：行為樹永遠不會讓你驚喜。如果你沒有為某種情境編寫分支，代理就無法應對該情境。
 
-**GOAP** buys *emergence*. The planner finds action chains you never explicitly wrote,
-which is magic when it works — and the problem when it doesn't. Debugging means asking
-"why did the planner choose this chain?", planning has a real CPU cost, and tuning behavior
-means indirectly nudging costs and world-state modeling rather than editing a structure.
-Most games that tried GOAP discovered their design actually wanted *authored* behavior:
-predictable enemies that telegraph and can be learned. It shines when improvisation is the
-point.
+**GOAP**帶來*湧現行為*。規劃器能找到你從未明確編寫的行動鏈——運作時如魔法般驚艷，出問題時卻令人頭痛。除錯意味著追問「規劃器為什麼選擇這條鏈？」；規劃本身有實際的 CPU 成本；調整行為意味著間接調整成本權重與世界狀態模型，而非直接編輯結構。大多數嘗試 GOAP 的遊戲最終發現它們真正想要的是*人工編寫*的行為：可預測、能預告、可被玩家學習的敵人。GOAP 在即興應變本身就是核心訴求時表現最佳。
 
-**Utility AI** buys *smooth prioritization over many competing motives*. Where a BT
-expresses "flee beats fight" as a hard ordering, utility expresses "flee gradually becomes
-more attractive as health drops and distance closes" — no thresholds, no branch flapping.
-The cost is tuning and explainability: behavior lives in curve shapes and weight tables,
-and "why did he do that?" turns into spreadsheet archaeology.
+**Utility AI**帶來*多個競爭動機之間的平滑優先級排序*。行為樹用硬性順序表達「逃跑優先於戰鬥」，而 utility 則表達「隨著血量降低且距離拉近，逃跑的吸引力逐漸增加」——沒有門檻值，沒有分支抖動。代價是調整與可解釋性：行為存在於曲線形狀與權重表中，而「他為什麼那樣做？」變成了一場試算表考古。
 
-## Head to head
+## 橫向比較
 
-| Dimension | Behavior tree | GOAP | Utility AI |
+| 維度 | 行為樹 | GOAP | Utility AI |
 |-----------|---------------|------|------------|
-| Who sequences actions | Author | Runtime planner | Neither — continuous re-scoring |
-| Predictability | **High** | Low | Medium |
-| Emergent solutions | None | **The whole point** | Some |
-| Debugging | Read the tree | Inspect planner search | Inspect scores/curves |
-| Designer tooling | **Mature visual editors** | Rare | Spreadsheets + custom UIs |
-| CPU cost | Low–medium | Planning spikes | Scoring every option, often |
-| Sweet spot | Enemies, bosses, NPCs, robots | Improvising agents, sim sandboxes | Ambient life, colony/sim games |
+| 行動順序由誰決定 | 作者 | 執行階段規劃器 | 皆非——持續重新評分 |
+| 可預測性 | **高** | 低 | 中 |
+| 湧現解決方案 | 無 | **核心訴求** | 部分 |
+| 除錯方式 | 閱讀樹 | 檢查規劃器搜尋 | 檢查分數/曲線 |
+| 設計師工具 | **成熟的視覺化編輯器** | 罕見 | 試算表 + 自訂 UI |
+| CPU 成本 | 低–中 | 規劃峰值 | 經常為所有選項評分 |
+| 最佳應用場景 | 敵人、頭目、NPC、機器人 | 即興應對型代理、模擬沙盒 | 環境生命體、 colony/模擬遊戲 |
 
-## The hybrids real games ship
+## 實際遊戲採用的混合方案
 
-These compose more often than they compete:
+這些架構經常互補而非競爭：
 
-- **Utility selector inside a BT.** The tree stays the skeleton, but one selector picks
-  its child by score instead of fixed order — top-N attacks scored by range, ammo, and
-  cooldown. You keep the tree's legibility and get smooth choice where it counts.
-- **Utility/GOAP picks the goal, a BT executes it.** A scorer or planner decides *what* to
-  pursue ("raid the larder"); an authored subtree handles *how*, with all the retry and
-  fallback patterns from [the examples catalog](/learn/behavior-tree-examples/).
-- **BT with planned leaves.** The tree is in charge, but one leaf invokes a planner for a
-  genuinely open-ended sub-problem (multi-step manipulation is common in
-  [robotics](/learn/behavior-trees-in-robotics/)).
+- **行為樹內的 utility 選擇器。** 樹仍作為骨架，但某個選擇器根據分數而非固定順序選取子節點——例如依射程、彈藥量和冷卻時間對頂層攻擊進行評分。你保留了行為樹的可讀性，在關鍵之處獲得平滑的選擇。
+- **Utility/GOAP 選擇目標，行為樹執行目標。** 評分器或規劃器決定*要做什麼*（「掠奪儲藏室」）；人工編寫的子樹處理*怎麼做*，包含[範例目錄](/learn/behavior-tree-examples/)中的所有重試與備援模式。
+- **帶有規劃葉節點的行為樹。** 樹為主控，但某個葉節點針對真正的開放式子問題呼叫規劃器（在[機器人學](/learn/behavior-trees-in-robotics/)中常見於多步驟操作）。
 
-## So which should you use?
+## 那麼你該用哪一種？
 
-- **Default to a behavior tree.** For enemies, companions, bosses, and mission logic,
-  authored, readable, tool-supported control wins — which is why BTs are the mainstream
-  choice in [Unity](/learn/behavior-trees-in-unity/),
-  [Unreal](/learn/behavior-trees-in-unreal-engine/), and robotics alike.
-- **Reach for utility** when many soft motives compete continuously — colony sims, ambient
-  crowds, needs-driven characters — or as a scoring selector inside your tree.
-- **Reach for GOAP** when emergent improvisation *is* the design pillar and you'll budget
-  real time for planner debugging.
+- **預設選擇行為樹。** 對於敵人、夥伴、頭目與任務邏輯，人工編寫、可讀、有工具支援的控制方式勝出——這也是行為樹在 [Unity](/learn/behavior-trees-in-unity/)、[Unreal](/learn/behavior-trees-in-unreal-engine/) 與機器人學中成為主流選擇的原因。
+- **當多個軟性動機持續競爭時選擇 utility**——殖民地模擬、環境人群、需求驅動的角色——或作為樹內部的評分選擇器。
+- **當湧現式即興應變是設計核心，且你願意投入實際時間進行規劃除錯時選擇 GOAP。**
 
-For the theory behind all three, **Ian Millington's *AI for Games***
-([Amazon](https://www.amazon.com/s?k=AI+for+Games+Ian+Millington&tag=behaviortrees-20)) covers
-the field, and **Dave Mark's *Behavioral Mathematics for Game AI***
-([Amazon](https://www.amazon.com/s?k=Behavioral+Mathematics+for+Game+AI&tag=behaviortrees-20))
-is the standard utility text. The free [Game AI Pro chapters](https://www.gameaipro.com/)
-include first-hand writeups of every architecture above.
+關於三者背後的理論，**Ian Millington 的《AI for Games》**
+([Amazon](https://www.amazon.com/s?k=AI+for+Games+Ian+Millington&tag=behaviortrees-20)) 涵蓋了整個領域，而 **Dave Mark 的《Behavioral Mathematics for Game AI》**
+([Amazon](https://www.amazon.com/s?k=Behavioral+Mathematics+for+Game+AI&tag=behaviortrees-20)) 則是 utility 的標準參考書。免費的 [Game AI Pro 章節](https://www.gameaipro.com/) 收錄了上述每種架構的第一手實戰經驗。
 
-If a behavior tree is your pick, sketch your agent in the
-[free online editor](/) before writing any code:
+如果你選擇行為樹，在撰寫任何程式碼之前，先在[免費線上編輯器](/)中繪製你的代理：
 
-<a class="try-editor" href="/?example=enemy-patrol">▶ Start from the enemy AI example</a>
+<a class="try-editor" href="/?example=enemy-patrol">▶ 從敵人 AI 範例開始</a>
 
-## Related guides
+## 相關指南
 
-- [Behavior Trees vs Finite State Machines](/learn/behavior-trees-vs-state-machines/)
-- [What Is a Behavior Tree?](/learn/what-is-a-behavior-tree/)
-- [Behavior Tree Examples: Common Game AI Patterns](/learn/behavior-tree-examples/)
+- [行為樹與有限狀態機](/learn/behavior-trees-vs-state-machines/)
+- [什麼是行為樹？](/learn/what-is-a-behavior-tree/)
+- [行為樹範例：常見遊戲 AI 模式](/learn/behavior-tree-examples/)

@@ -1,98 +1,70 @@
 ---
+lang: zh_TW
 layout: ../../layouts/ArticleLayout.astro
-title: "Behavior Trees in Unity: Options, Assets, and How to Choose"
-description: "Every way to get behavior trees into Unity in 2026 — Unity Behavior, Behavior Designer, NodeCanvas, open-source libraries, or rolling your own — with honest trade-offs and a design-first workflow."
+title: "在 Unity 中使用行為樹：選項、套件與如何選擇"
+description: "2026 年將行為樹導入 Unity 的每一種方式——Unity Behavior、Behavior Designer、NodeCanvas、開源函式庫或自行打造——附帶誠實的取捨評估與設計優先的工作流程。"
 pubDate: "2026-07-20"
 order: 6
 ---
+lang: zh_TW
 
-# Behavior Trees in Unity
+# 在 Unity 中使用行為樹
 
-<div class="disclosure">Disclosure: some links on this page are affiliate links. If you buy
-through them we may earn a commission at no extra cost to you. It helps keep the free editor
-running.</div>
+<div class="disclosure">揭露聲明：本頁部分連結為聯盟連結。如果您透過這些連結購買產品，我們可能在不增加您額外費用的情況下獲得佣金。這有助於維持免費編輯器的運作。</div>
 
-Unity doesn't force one AI architecture on you, which means the first real decision is
-*which* behavior tree implementation to adopt. There are five viable routes, and choosing
-wrong is expensive to undo mid-project. Here's the landscape, honestly assessed.
+Unity 不會強迫您採用單一 AI 架構，這意味著第一個真正的決定是要採用*哪個*行為樹實作。有五條可行的路線，而選錯的話要在專案中途補救是相當昂貴的。以下是經過誠實評估的現況。
 
-(If you're still deciding whether behavior trees fit your game at all, start with
-[Behavior Trees vs Finite State Machines](/learn/behavior-trees-vs-state-machines/).)
+（如果您還在猶豫行為樹是否適合您的遊戲，請先從[行為樹 vs 有限狀態機](/learn/behavior-trees-vs-state-machines/)開始。）
 
-## Option 1: Unity Behavior (official, free)
+## 選項 1：Unity Behavior（官方、免費）
 
-Unity now ships an official behavior tree package, **Unity Behavior** (the successor to the
-"Muse Behavior" experiment), with a visual graph editor, blackboard variables, and runtime
-debugging. It's free, integrated, and supported by Unity itself.
+Unity 現在提供一個官方的行為樹套件 **Unity Behavior**（繼承自「Muse Behavior」實驗的後繼產品），包含視覺化圖形編輯器、黑板變數與執行期除錯。它免費、整合且由 Unity 官方支援。
 
-**Choose it if** you're on a recent Unity version and want a maintained, no-cost default.
-**Watch out for**: it's young compared to the veteran assets below — fewer built-in nodes,
-fewer community examples, and APIs that are still evolving.
+**選擇它，如果**您使用的是較新的 Unity 版本，並且想要一個持續維護、無成本的預設方案。**需要注意**：相較於下面那些成熟的套件，它還很年輕——內建節點較少、社群範例較少，而且 API 仍在持續演進中。
 
-## Option 2: Behavior Designer (Asset Store, paid)
+## 選項 2：Behavior Designer（Asset Store、付費）
 
-[Behavior Designer](https://assetstore.unity.com/packages/tools/visual-scripting/behavior-designer-behavior-trees-for-everyone-15277)
-by Opsive is the long-standing heavyweight: mature visual editor, hundreds of prebuilt
-tasks, integrations with most popular assets (A* Pathfinding, animation packs), runtime
-debugging, and years of production use behind it. A "Pro" edition targets DOTS/ECS-scale
-performance.
+Opsive 的 [Behavior Designer](https://assetstore.unity.com/packages/tools/visual-scripting/behavior-designer-behavior-trees-for-everyone-15277) 是長期的重量級方案：成熟的視覺化編輯器、數百個預建任務、與大多數熱門套件的整合（A* Pathfinding、動畫包）、執行期除錯，以及多年的實際專案使用經驗。「Pro」版本專注於 DOTS/ECS 規模的效能。
 
-**Choose it if** you want the most battle-tested option and prebuilt tasks that save weeks.
-It's the safest paid pick for a commercial project.
+**選擇它，如果**您想要經過最多實戰考驗的選項，以及能節省數週工時的預建任務。對於商業專案來說，這是最安全的付費選擇。
 
-## Option 3: NodeCanvas (Asset Store, paid)
+## 選項 3：NodeCanvas（Asset Store、付費）
 
-[NodeCanvas](https://assetstore.unity.com/packages/tools/visual-scripting/nodecanvas-14914)
-by Paradox Notion bundles behavior trees **plus** hierarchical state machines and dialogue
-trees in one framework, with a polished editor. That combination matters more than it
-sounds: as covered in the [BT vs FSM comparison](/learn/behavior-trees-vs-state-machines/),
-real games often want both, and NodeCanvas lets a BT branch *contain* an FSM and vice versa.
+Paradox Notion 的 [NodeCanvas](https://assetstore.unity.com/packages/tools/visual-scripting/nodecanvas-14914) 將行為樹**加上**階層狀態機與對話樹整合在一個框架中，並附帶精美的編輯器。這種組合的重要性超乎想像：正如 [BT 與 FSM 比較](/learn/behavior-trees-vs-state-machines/)中所提到的，實際的遊戲往往兩者都需要，而 NodeCanvas 讓 BT 的分支可以*包含* FSM，反之亦然。
 
-**Choose it if** you want trees and state machines under one roof.
+**選擇它，如果**您希望將樹狀結構與狀態機整合在同一個屋簷下。
 
-## Option 4: open-source libraries
+## 選項 4：開源函式庫
 
-Solid free options if you prefer code-first trees or want no dependency on paid assets:
-**fluid-behavior-tree** (builder-pattern C#, very readable), **BehaviorTree.CPP-style
-ports**, or the classic **behavior3** runtimes (the same family this site's editor exports
-for — see below).
+如果您偏好程式碼優先的樹狀結構，或不想依賴付費套件，以下是可靠的免費選項：**fluid-behavior-tree**（採用 builder 模式的 C#，可讀性極高）、**BehaviorTree.CPP 風格的移植版**，或經典的 **behavior3** 執行環境（與本網站編輯器匯出所用的系列相同——詳見下文）。
 
-**Choose them if** your team is programmer-heavy and doesn't need designer-facing editors,
-or your budget is zero.
+**選擇它們，如果**您的團隊以程式設計師為主，不需要面對設計師的編輯器，或者您的預算為零。
 
-## Option 5: roll your own
+## 選項 5：自行打造
 
-A minimal BT core — node base class, three statuses, sequence/selector/decorator — is a few
-hundred lines of C# ([here's the complete shape](/learn/how-to-implement-a-behavior-tree/)). Many senior programmers do exactly this for control and debuggability.
-The trap isn't the core; it's the six months of tooling (visual authoring, runtime
-inspection, serialization) you'll slowly rebuild. If you go this route, design trees in an
-external editor rather than hand-writing construction code.
+一個最簡的行為樹核心——節點基底類別、三種狀態、序列/選擇/裝飾節點——只需幾百行 C#（[這裡有完整的輪廓](/learn/how-to-implement-a-behavior-tree/)）。許多資深程式設計師為了掌控性與可除錯性而這麼做。陷阱不在於核心本身，而在於您將慢慢重建的那六個月工具鏈（視覺化編輯、執行期檢查、序列化）。如果選擇這條路，請在外部編輯器中設計樹狀結構，而不是手寫建構程式碼。
 
-## A design-first workflow that works with all five
+## 適用於所有五種方案的設計優先工作流程
 
-Whichever runtime you pick, keep tree *design* separate from tree *implementation*:
+無論您選擇哪個執行環境，請將樹狀結構的*設計*與*實作*分開：
 
-1. **Sketch the tree visually** in the free [online behavior tree editor](/) — no install,
-   no signup. Get the priorities and structure right while it's cheap to change.
-2. **Export JSON** describing nodes, hierarchy and properties.
-3. **Map leaves to code**: implement each condition/action name from the design as a task in
-   your chosen framework — or load behavior3-format JSON directly with a behavior3 C# runtime.
-4. Iterate in the visual editor, re-export, re-test.
+1. **在免費的[線上行為樹編輯器](/)中以視覺化方式草擬樹狀結構**——無需安裝、無需註冊。在修改成本還很低的時候，先把優先級與結構設計正確。
+2. **匯出 JSON**，描述節點、層級結構與屬性。
+3. **將葉節點對應到程式碼**：將設計中的每個條件/動作名稱實作為您所選框架中的任務——或者使用 behavior3 C# 執行環境直接載入 behavior3 格式的 JSON。
+4. 在視覺化編輯器中迭代，重新匯出，重新測試。
 
-<a class="try-editor" href="/?example=enemy-patrol">▶ Sketch your first tree now — enemy AI starter</a>
+<a class="try-editor" href="/?example=enemy-patrol">▶ 立即草擬您的第一棵樹——敵人 AI 入門</a>
 
-## Going deeper
+## 深入閱讀
 
-The book most Unity AI programmers actually learn from is **Ian Millington's *AI for
-Games*** — it covers behavior trees alongside steering, pathfinding, and decision-making
-in engine-agnostic terms
-([find it on Amazon](https://www.amazon.com/s?k=AI+for+Games+Ian+Millington&tag=behaviortrees-20)).
-For free reading, the **Game AI Pro** series chapters on behavior trees are
-[available online](https://www.gameaipro.com/) and remain excellent.
+大多數 Unity AI 程式設計師實際學習所用的書是 **Ian Millington 的 *AI for Games***——它以引擎無關的方式涵蓋了行為樹、操控、路徑尋找與決策制定
+（[在 Amazon 上尋找](https://www.amazon.com/s?k=AI+for+Games+Ian+Millington&tag=behaviortrees-20)）。
+免費閱讀方面，**Game AI Pro** 系列中關於行為樹的章節已
+[在線上公開](https://www.gameaipro.com/)，內容依然非常出色。
 
-## Related guides
+## 相關指南
 
-- [Sequence, Selector, and Decorator Nodes Explained](/learn/behavior-tree-nodes-explained/)
-- [Behavior Tree Examples: Common Game AI Patterns](/learn/behavior-tree-examples/)
-- Shipping on other engines too? [Unreal Engine](/learn/behavior-trees-in-unreal-engine/) ·
+- [Sequence、Selector 與 Decorator 節點解說](/learn/behavior-tree-nodes-explained/)
+- [行為樹範例：常見遊戲 AI 模式](/learn/behavior-tree-examples/)
+- 也使用其他引擎？[Unreal Engine](/learn/behavior-trees-in-unreal-engine/) ·
   [Godot](/learn/behavior-trees-in-godot/)

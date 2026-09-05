@@ -1,115 +1,76 @@
 ---
+lang: zh_TW
 layout: ../../layouts/ArticleLayout.astro
-title: "Behavior Tree Blackboards: How Nodes Share Data"
-description: "What a blackboard is, why every serious behavior tree framework has one, how key scoping works, and the patterns — and pitfalls — of using blackboards in Unreal, BehaviorTree.CPP, and behavior3."
+title: "行為樹黑板：節點如何共享資料"
+description: "什麼是黑板、為何每個嚴謹的行為樹框架都有它、金鑰作用域如何運作，以及在 Unreal、BehaviorTree.CPP 和 behavior3 中使用黑板的模式與陷阱。"
 pubDate: "2026-07-28"
 order: 3
 ---
+lang: zh_TW
 
-# Behavior Tree Blackboards
+# 行為樹黑板
 
-A behavior tree is very good at describing *control flow* — what to try first, what to fall
-back to — and completely silent about *data flow*. The tree says "Chase the player," but
-nothing in the structure says how `Is Player Visible?` tells `Move To Player` **which**
-player, or where it was last seen. Every practical framework solves this the same way: a
-**blackboard**.
+行為樹非常擅長描述*控制流程*——先嘗試什麼、失敗後備方案是什麼——但對於*資料流程*則完全沉默。樹說「追趕玩家」，但結構中沒有任何東西說明 `Is Player Visible?` 如何告訴 `Move To Player` **哪個**玩家，或是在哪裡最後看到它。每個實用框架都用相同的方式解決這個問題：**黑板**。
 
-A blackboard is a key/value store attached to the agent (or the tree instance) that acts as
-the tree's working memory. Leaves read from it and write to it; the tree structure itself
-never touches it.
+黑板是一個依附於代理（或樹實例）的鍵/值儲存，作為樹的工作記憶體。葉子節點從中讀取並寫入；樹結構本身從不觸碰它。
 
 ```text
-   Perception system ──writes──▶ ┌─────────────────────────┐
-                                 │        Blackboard        │
-                                 │  target:    Player #2    │
-                                 │  lastSeen:  (14, 3, 20)  │
-                                 │  health:    34           │
-                                 └─────────────────────────┘
-                                    ▲               ▲
-                            reads───┘               └───reads
-                     Is Player Visible?          Move To (target)
+   感知系統 ──寫入──▶ ┌─────────────────────────┐
+                     │        黑板               │
+                     │  target:    Player #2     │
+                     │  lastSeen:  (14, 3, 20)   │
+                     │  health:    34            │
+                     └─────────────────────────┘
+                        ▲               ▲
+              讀取──────┘               └──────讀取
+         Is Player Visible?          Move To (target)
 ```
 
-The name comes from classic AI: independent specialists cooperating by reading and writing
-a shared blackboard, none of them talking to each other directly. That indirection is the
-entire point — `Is Player Visible?` and `Move To Player` stay reusable, single-purpose
-leaves precisely because neither knows the other exists.
+這個名稱來自經典人工智慧：獨立的專家透過讀寫共享的黑板來協作，彼此之間不直接對話。這種間接性正是重點所在——`Is Player Visible?` 和 `Move To Player` 之所以能保持可重用、單一用途的葉子節點，正是因為兩者都不知道對方的存在。
 
-## Why not just use member variables?
+## 為什麼不直接用成員變數？
 
-You can, for a one-off agent. But the blackboard buys three things member variables don't:
+對於一次性代理，你可以這樣做。但黑板提供了成員變數無法提供的三項好處：
 
-- **Leaves stay generic.** A `MoveTo(key)` task that reads its destination from a
-  blackboard key works for chasing, fleeing, patrolling, and returning home — four
-  behaviors, one action. This is the "small, parameterized leaves" advice from
-  [the node reference](/learn/behavior-tree-nodes-explained/) made concrete.
-- **Sensors decouple from decisions.** Expensive checks (visibility raycasts, pathfinding
-  queries) run on their own schedule and cache results in the blackboard; conditions in the
-  tree just read the cached value. This is the standard fix for the "BTs re-check
-  everything every tick" cost discussed in
-  [the FSM comparison](/learn/behavior-trees-vs-state-machines/).
-- **Tools can see it.** Because state lives in one inspectable place, visual debuggers can
-  show you exactly what the tree believes — which is most of debugging an AI.
+- **葉子節點保持通用。** 一個從黑板金鑰讀取目的地並 `MoveTo(key)` 的任務，可以用於追趕、逃離、巡邏以及返回基地——四種行為，一個動作。這就是[節點參考](/learn/behavior-tree-nodes-explained/)中「小型的、參數化的葉子節點」建議的具體體現。
+- **感知器與決策解耦。** 昂貴的檢查（可見性射線檢測、路徑查找查詢）按照自己的排程運行，並將結果快取在黑板中；樹中的條件節點只需讀取快取的值。這是[FSM 比較](/learn/behavior-trees-vs-state-machines/)中討論的「BT 每幀重新檢查所有內容」成本問題的標準解決方案。
+- **工具可以看見它。** 由於狀態存放在一個可檢查的位置，視覺除錯器可以向你展示樹所相信的一切——這正是除錯 AI 的大部分工作。
 
-## Scoping: not all keys are equal
+## 作用域：並非所有金鑰都相同
 
-Mature frameworks scope blackboard data, and the scopes matter:
+成熟的框架會對黑板資料進行作用域劃分，而這些作用域至關重要：
 
-| Scope | Lifetime | Typical contents |
-|-------|----------|------------------|
-| Agent / global | The whole agent | Target, health, home position |
-| Per-tree | One tree instance | "Is this tree's open-door subtree mid-way through?" |
-| Per-node | One node in one tree | A memory sequence's running-child index, a cooldown's timestamp |
+| 作用域 | 生命週期 | 典型內容 |
+|-------|----------|----------|
+| 代理 / 全域 | 整個代理 | 目標、生命值、起始位置 |
+| 每棵樹 | 一個樹實例 | 「這棵樹的開門子樹是否進行到一半？」 |
+| 每個節點 | 一棵樹中的一個節點 | 記憶序列的運行中子索引、冷卻的時間戳 |
 
-That last row is worth pausing on: **the tree's own bookkeeping lives in the blackboard
-too.** In behavior3-family runtimes (the format this site's
-[editor](/) exports), `MemSequence` stores which child was running, and `Cooldown` stores
-its last-fired time, in node-scoped blackboard memory — which is why one tree definition
-can drive a hundred agents simultaneously. The tree is stateless and shared; each agent's
-blackboard carries all the per-agent state.
+最後一行值得細看：**樹自身的簿記資料也存放在黑板中。** 在 behavior3 系列的執行環境中（本站[編輯器](/)匯出的格式），`MemSequence` 儲存哪個子節點正在執行，`Cooldown` 儲存其上次觸發的時間——這些都存放在節點作用域的黑板記憶體中——這就是為什麼同一棵樹的定義可以同時驅動上百個代理。樹是無狀態且共享的；每個代理的黑板攜帶著所有代理專屬的狀態。
 
-## The same idea in each ecosystem
+## 每個生態系中的相同概念
 
-- **Unreal Engine** makes the blackboard a first-class asset with typed keys, and goes a
-  step further: decorators *observe* keys and abort running branches when values change —
-  the blackboard isn't just memory, it's the event system. See
-  [Behavior Trees in Unreal](/learn/behavior-trees-in-unreal-engine/).
-- **BehaviorTree.CPP** (robotics) gives every node input/output *ports* wired to blackboard
-  entries, and lets subtrees **remap** names at the boundary — the subtree reads `target`,
-  the parent maps it to `enemy_position`. That remapping is what makes subtree reuse safe
-  at scale. See [Behavior Trees in Robotics](/learn/behavior-trees-in-robotics/).
-- **behavior3** exposes `blackboard.get(key, treeScope, nodeScope)` — the three scopes from
-  the table, directly.
+- **Unreal Engine** 將黑板視為帶有型別金鑰的一級資產，並且更進一步：裝飾器*監聽*金鑰，並在值改變時中止正在運行的分支——黑板不僅是記憶體，還是事件系統。請參閱 [Unreal 中的行為樹](/learn/behavior-trees-in-unreal-engine/)。
+- **BehaviorTree.CPP**（機器人學）為每個節點提供連接到黑板條目的輸入/輸出*連接埠*，並允許子樹在邊界上**重新映射**名稱——子樹讀取 `target`，父節點將其映射為 `enemy_position`。這種重新映射使得子樹在大規模使用時能夠安全地重用。請參閱[機器人學中的行為樹](/learn/behavior-trees-in-robotics/)。
+- **behavior3** 公開了 `blackboard.get(key, treeScope, nodeScope)`——直接對應上表中的三個作用域。
 
-## Patterns that keep it sane
+## 保持理智的模式
 
-A blackboard is, structurally, a bag of global variables — and it degrades exactly the way
-globals do if you're careless. The patterns that prevent that:
+從結構上說，黑板就是一袋全域變數——如果不小心使用，它會以與全域變數完全相同的方式退化。防止這種情況的模式：
 
-1. **Write from few places, read from many.** Perception/sensor code writes; tree leaves
-   mostly read. When any node can write any key, you've rebuilt spaghetti with extra steps.
-2. **Treat keys as an API.** The set of keys is the contract between your tree design and
-   your engine code. Name keys like you'd name public API, and document them next to the
-   tree.
-3. **Clear stale data deliberately.** "Target died but `target` still points at the
-   corpse" is the classic blackboard bug. Decide who nulls keys and when.
-4. **Prefer a key per fact, not per behavior.** `lastKnownPlayerPosition` serves chase,
-   search, and aim; `chaseDestination` serves one branch and multiplies.
+1. **從少數地方寫入，從多數地方讀取。** 感知/感測器程式碼負責寫入；樹的葉子節點主要負責讀取。當任何節點都能寫入任何金鑰時，你就用更多步驟重建了義大利麵式程式碼。
+2. **將金鑰視為 API。** 金鑰集合是樹的設計與引擎程式碼之間的合約。像命名公開 API 一樣命名金鑰，並在樹旁邊加以文件說明。
+3. **有意識地清除過期資料。**「目標已死亡，但 `target` 仍指向屍體」是經典的黑板錯誤。決定誰在何時將金鑰設為空值。
+4. **每個事實偏好一個金鑰，而非每個行為一個金鑰。** `lastKnownPlayerPosition` 服務於追趕、搜索和瞄準；而 `chaseDestination` 只服務於一個分支，並導致數量膨脹。
 
-## Try it
+## 試試看
 
-The [survival-override example](/?example=survival-override) is a good specimen: health,
-target, and waypoint state all flow through the tree invisibly. Open it, and as you read
-each leaf, ask "what key would this read or write?" — `health` feeds `Is Health Low?`,
-perception writes the target `Move To Player` consumes, `Next Waypoint` advances an index
-`Move To Waypoint` reads. Sketching that column is most of the work of taking a design to
-[Unity](/learn/behavior-trees-in-unity/), [Unreal](/learn/behavior-trees-in-unreal-engine/),
-or a robot.
+[survival-override 範例](/?example=survival-override)是一個很好的範例：生命值、目標和路徑點狀態都在樹中無形地流動。打開它，當你閱讀每個葉子節點時，問自己「這個節點會讀取或寫入哪個金鑰？」——`health` 供給 `Is Health Low?`，感知寫入 `Move To Player` 使用的目標，`Next Waypoint` 推進 `Move To Waypoint` 讀取的索引。勾勒出那個欄位，就是將設計帶到 [Unity](/learn/behavior-trees-in-unity/)、[Unreal](/learn/behavior-trees-in-unreal-engine/) 或機器人上的大部分工作。
 
-<a class="try-editor" href="/?example=survival-override">▶ Open the survival-override example in the editor</a>
+<a class="try-editor" href="/?example=survival-override">▶ 在編輯器中開啟 survival-override 範例</a>
 
-## Related guides
+## 相關指南
 
-- [Sequence, Selector, and Decorator Nodes Explained](/learn/behavior-tree-nodes-explained/)
-- [Debugging Behavior Trees](/learn/debugging-behavior-trees/)
-- [Structuring Large Behavior Trees](/learn/structuring-large-behavior-trees/)
+- [序列、選擇器與裝飾器節點解說](/learn/behavior-tree-nodes-explained/)
+- [除錯行為樹](/learn/debugging-behavior-trees/)
+- [組織大型行為樹](/learn/structuring-large-behavior-trees/)

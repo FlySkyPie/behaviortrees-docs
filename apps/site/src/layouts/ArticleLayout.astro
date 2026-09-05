@@ -7,6 +7,9 @@ const updatedDate = frontmatter?.updatedDate;
 const isArticle = !!frontmatter;
 const isDraft = !!frontmatter?.draft;
 const isGuideIndex = Astro.props.variant === 'guide-index';
+const lang = Astro.props.lang ?? frontmatter?.lang ?? 'zh_TW';
+const isZhTW = true;
+const locale = isZhTW ? 'zh_TW' : 'en';
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 
 // Amazon Associates ID for the behaviortrees.com account.
@@ -48,7 +51,7 @@ const jsonLd = isArticle
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -105,18 +108,18 @@ const jsonLd = isArticle
                 <span class="brand">behavior<span>trees</span></span>
             </a>
             <div class="nav-links">
-                <a href="/learn/">Home</a>
-                <a href="/editor">Editor</a>
-                <a href="/projects">Projects</a>
-                <a href="/settings">Settings</a>
+                <a href="/learn/">{isZhTW ? '首頁' : 'Home'}</a>
+                <a href="/editor">{isZhTW ? '編輯器' : 'Editor'}</a>
+                <a href="/projects">{isZhTW ? '專案' : 'Projects'}</a>
+                <a href="/settings">{isZhTW ? '設定' : 'Settings'}</a>
                 <button
                     type="button"
                     id="theme-toggle"
                     class="theme-pill"
                     role="switch"
                     aria-checked="false"
-                    aria-label="Toggle theme"
-                    title="Toggle theme"
+                    aria-label={isZhTW ? '切換主題' : 'Toggle theme'}
+                    title={isZhTW ? '切換主題' : 'Toggle theme'}
                 >
                     <span class="knob">
                         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
@@ -133,7 +136,7 @@ const jsonLd = isArticle
     </header>
 
     <div class="personal-banner">
-        This document was not created by the author of <a href="https://www.behaviortrees.com/" target="_blank" class="banner-link">behaviortrees</a>; it was made for my personal use.
+        {isZhTW ? '此文件並非由' : 'This document was not created by the author of '}<a href="https://www.behaviortrees.com/" target="_blank" class="banner-link">behaviortrees</a>{isZhTW ? ' 的作者所建立；它是為了我個人使用而製作的。' : '; it was made for my personal use.'}
     </div>
 
     <script is:inline>
@@ -165,7 +168,7 @@ const jsonLd = isArticle
     </script>
 
     <main class:list={{ 'guide-index-main': isGuideIndex }}>
-        {isDraft && <p class="draft-banner">Draft — unlisted and not indexed until published.</p>}
+        {isDraft && <p class="draft-banner">{isZhTW ? '草稿 — 發佈前不會列在目錄中，也不會被索引。' : 'Draft — unlisted and not indexed until published.'}</p>}
         <article class:list={{ 'guide-index-article': isGuideIndex }}>
             <slot />
         </article>
@@ -178,8 +181,8 @@ const jsonLd = isArticle
         {
             !isGuideIndex && (
                 <section class="reading">
-                    <h2>Recommended reading</h2>
-                    <p>Books that go deeper on behavior trees and game AI.</p>
+                    <h2>{isZhTW ? '推薦閱讀' : 'Recommended reading'}</h2>
+                    <p>{isZhTW ? '深入探討行為樹與遊戲 AI 的書籍。' : 'Books that go deeper on behavior trees and game AI.'}</p>
                     <ul>
                         {books.map((book) => (
                             <li>
@@ -195,7 +198,7 @@ const jsonLd = isArticle
                         ))}
                     </ul>
                     <p class="affiliate-note">
-                        As an Amazon Associate, behaviortrees.com earns from qualifying purchases.
+                        {isZhTW ? '作為 Amazon 夥伴，behaviortrees.com 從符合資格的購買中獲取收益。' : 'As an Amazon Associate, behaviortrees.com earns from qualifying purchases.'}
                     </p>
                 </section>
             )
@@ -204,12 +207,12 @@ const jsonLd = isArticle
 
     <footer class="site-footer">
         <p>
-            <a href="/learn/">Guides</a> ·
-            <a href="/">Behavior Tree Editor</a> ·
-            <a href="https://old.behaviortrees.com">Classic editor</a> ·
+            <a href="/learn/">{isZhTW ? '指南' : 'Guides'}</a> ·
+            <a href="/">{isZhTW ? '行為樹編輯器' : 'Behavior Tree Editor'}</a> ·
+            <a href="https://old.behaviortrees.com">{isZhTW ? '經典編輯器' : 'Classic editor'}</a> ·
             <a href="https://github.com/behaviortrees/behaviortrees">GitHub</a>
         </p>
-        <p>© {new Date().getFullYear()} behaviortrees.com. Editor based on the MIT-licensed behavior3editor.</p>
+        <p>© {new Date().getFullYear()} behaviortrees.com. {isZhTW ? '編輯器基於 MIT 授權的 behavior3editor。' : 'Editor based on the MIT-licensed behavior3editor.'}</p>
     </footer>
 </body>
 </html>

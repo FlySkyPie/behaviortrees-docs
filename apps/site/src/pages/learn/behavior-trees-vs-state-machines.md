@@ -1,92 +1,83 @@
 ---
+lang: zh_TW
 layout: ../../layouts/ArticleLayout.astro
-title: "Behavior Trees vs Finite State Machines: Which Should You Use?"
-description: "An honest comparison of behavior trees and finite state machines for game AI — scalability, reactivity, debugging, performance — with concrete guidance on when each one wins."
+title: "行為樹 vs 有限狀態機：你該用哪一種？"
+description: "行為樹與有限狀態機在遊戲 AI 中的誠實比較——可擴展性、反應性、除錯、效能——並針對何時何者勝出提供具體指引。"
 pubDate: "2026-07-20"
 order: 4
 ---
+lang: zh_TW
 
-# Behavior Trees vs Finite State Machines
+# 行為樹 vs 有限狀態機
 
-Ask "should my AI be a behavior tree or a state machine?" in any gamedev community and
-you'll get confident answers in both directions. Both architectures are mainstream, both
-ship in AAA games, and both can implement the same agents. The real question is which one
-stays maintainable as *your* project grows. Here's the honest comparison.
+在任何遊戲開發社群中問「我的 AI 應該用行為樹還是狀態機？」，
+你會得到雙方各自堅定支持的答案。兩種架構都屬主流，都在 AAA 遊戲中實際出貨，
+也都能實現同樣的 agent。真正的問題是：隨著你的專案成長，哪一種還能保持可維護性。
+以下是誠實的比較。
 
-## The 30-second versions
+## 30 秒速覽
 
-A **finite state machine (FSM)** models the agent as being in exactly one *state*
-(Patrol, Chase, Attack, Flee), with explicit *transitions* between states triggered by
-events or conditions. Simple, fast, and the transitions are exactly as flexible — and as
-numerous — as you make them.
+**有限狀態機 (FSM)** 將 agent 模型化為恰好處於一個*狀態*（巡邏、追逐、攻擊、逃脫），
+狀態之間有明確的*轉換*，由事件或條件觸發。簡單、快速，而轉換的靈活度——以及數量——
+完全由你決定。
 
-A **behavior tree (BT)** models the agent as a tree of prioritized tasks, re-evaluated on a
-tick from the root. There are no explicit transitions; "switching behaviors" falls out of
-selectors picking a different branch when conditions change.
-(New to trees? Read [What Is a Behavior Tree?](/learn/what-is-a-behavior-tree/) first.)
+**行為樹 (BT)** 將 agent 模型化為一棵由優先順序排列的任務樹，每個 tick 從根節點重新評估。
+這裡沒有明確的轉換；「切換行為」源自選擇器（Selector）在條件改變時選取不同的分支。
+（初次接觸行為樹？請先閱讀[什麼是行為樹？](/learn/what-is-a-behavior-tree/)。）
 
-## Where FSMs hurt: transition explosion
+## FSM 的痛點：轉換爆炸
 
-The canonical FSM failure mode is quadratic wiring. With 4 states, adding "flee when health
-is low" means adding a transition from every state — 4 new edges and 4 places to maintain.
-With 15 states, the diagram is unreadable and every new global behavior touches everything.
+FSM 的典型失敗模式是「接線爆炸」。以 4 個狀態為例，加入「血量過低時逃脫」意味著要從每個狀態
+加上一條轉換——4 條新連線和 4 個需要維護的地方。到了 15 個狀態時，圖表已無法閱讀，
+每個新的全域行為都要觸及所有狀態。
 
-The BT equivalent is one edit: add a high-priority "Flee" branch under the root selector.
-Every lower-priority behavior is automatically interruptible by it, because the tree
-re-evaluates priorities every tick. **This is the single biggest practical argument for
-behavior trees.**
+BT 的對等做法是一次編輯：在根選擇器下新增一個高優先權的「逃脫」分支。
+所有較低優先權的行為都會自動被它打斷，因為樹每個 tick 都會重新評估優先順序。
+**這是行為樹在實務上最有力的論據。**
 
-## Where BTs hurt: stateful, cyclic flows
+## BT 的痛點：具狀態與循環流程
 
-Some logic genuinely *is* a state machine. Turn-based game flow (menu → deploy → battle →
-results), animation states, network connection lifecycles — these have well-defined modes,
-few global interrupts, and cyclic transitions that BTs express awkwardly. Forcing them into
-a tree gives you condition-checking gymnastics to reconstruct state you could have just...
-stored.
+有些邏輯本質上就是狀態機。回合制遊戲流程（選單 → 佈署 → 戰鬥 → 結算）、
+動畫狀態、網路連線生命週期——這些都有明確的模式、少量的全域中斷以及 BT 難以表達的循環轉換。
+硬把它們塞進一棵樹裡，只會讓你用條件檢查的各種花招來重現那些本來可以直接……儲存的狀態。
 
-BTs also re-evaluate conditions every tick, which is both their superpower (reactivity) and
-a cost: naive trees re-run expensive checks (visibility raycasts, pathfinding queries)
-constantly. Real projects cache expensive queries in a
-[blackboard](/learn/behavior-tree-blackboard/), tick trees at lower frequencies, or use
-event-driven variants.
+BT 每個 tick 都會重新評估條件，這既是它的超能力（反應性），也是它的成本：
+單純的行樹會不斷執行昂貴的檢查（可見性射線檢測、尋路查詢）。
+真實專案會把昂貴的查詢快取在[黑板](/learn/behavior-tree-blackboard/)中、
+以較低頻率 tick 樹、或使用事件驅動的變體。
 
-## Head to head
+## 正面對決
 
-| Dimension | FSM | Behavior tree |
+| 面向 | FSM | 行為樹 |
 |-----------|-----|---------------|
-| Small AI (2–5 behaviors) | **Wins** — trivial to write and read | Slight overkill |
-| Large AI (10+ behaviors) | Transition spaghetti | **Wins** — scales by composition |
-| Global interrupts ("always flee at low HP") | Edge from every state | **Wins** — one priority branch |
-| Reusing logic between agents | Copy states *and* rewire transitions | **Wins** — graft a subtree |
-| Stateful/cyclic flows (menus, animation) | **Wins** — natural fit | Awkward |
-| Raw CPU cost per decision | **Wins** — an enum and a switch | Tree traversal + re-checked conditions |
-| Designer-editable tooling | Rare | **Wins** — visual editors are the norm |
-| Debugging | Easy: "what state am I in" | Needs tree-visualization tooling |
+| 小型 AI（2–5 個行為） | **勝出** — 書寫與閱讀都 trivial | 略嫌殺雞用牛刀 |
+| 大型 AI（10+ 個行為） | 轉換義大利麵 | **勝出** — 透過組合擴展 |
+| 全域中斷（「血量過低時總是逃脫」） | 每個狀態都要加一條邊 | **勝出** — 一個優先分支 |
+| 在不同 agent 之間重複使用邏輯 | 複製狀態*並*重新接線轉換 | **勝出** — 嫁接子樹 |
+| 具狀態/循環流程（選單、動畫） | **勝出** — 天生契合 | 彆扭 |
+| 每次決策的原始 CPU 成本 | **勝出** — 一個 enum 加一個 switch | 樹走訪 + 重新檢查條件 |
+| 可供設計師編輯的工具 | 罕見 | **勝出** — 可視化編輯器是常態 |
+| 除錯 | 簡單：「我現在在哪個狀態」 | 需要可視化樹的工具 |
 
-## The hybrid answer real games use
+## 真實遊戲使用的混合方案
 
-This isn't actually an either/or. Common production patterns:
+這其實不是非此即彼的選擇。常見的業界模式包括：
 
-- **BT for decisions, FSM for execution.** The tree decides *what* to do; each action leaf
-  drives an animation/locomotion state machine that does it.
-- **FSM at the top, BTs inside.** High-level game modes are states; the combat mode's brain
-  is a behavior tree.
-- **Utility scoring bolted on.** Some games score branches by utility functions instead of
-  fixed priority order — utility AI and BTs compose well. (Weighing those architectures
-  too? See [Behavior Trees vs GOAP vs Utility AI](/learn/behavior-trees-vs-goap-vs-utility-ai/).)
+- **BT 做決策，FSM 做執行。** 樹決定*要做什麼*；每個動作葉節點驅動一個動畫/移動狀態機去執行。
+- **上層 FSM，內部 BT。** 高階遊戲模式是狀態；戰鬥模式的「大腦」則是一棵行為樹。
+- **加上效用評分。** 有些遊戲用效用函數對分支評分，而非固定的優先順序——效用 AI 和 BT 搭配得很好。
+（也想比較這些架構？請參閱[行為樹 vs GOAP vs 效用 AI](/learn/behavior-trees-vs-goap-vs-utility-ai/)。）
 
-## So which should you use?
+## 那麼你該用哪一種？
 
-- **A handful of behaviors, one-off agent, game jam?** FSM (or plain code). You'll ship faster.
-- **AI you'll iterate on for months, multiple agent types sharing logic, designers in the
-  loop?** Behavior tree. The composition and tooling advantages compound.
-- **Mode-heavy flow logic?** FSM, possibly with BTs inside the complex modes.
+- **只有少數幾個行為、一次性 agent、Game Jam？** FSM（或直接寫程式碼）。你會更快出貨。
+- **AI 要迭代好幾個月、多種 agent 類型共享邏輯、設計師也參與其中？** 行為樹。組合性與工具優勢會持續累積。
+- **以模式為主的流程邏輯？** FSM，可以在複雜模式內部搭配 BT。
 
-If you land on behavior trees, the fastest way to build intuition is hands-on: sketch your
-agent in the [free online behavior tree editor](/) — start from the
-[enemy AI example](/?example=enemy-patrol) and reshape it into your own design, then export
-JSON for [Unity](/learn/behavior-trees-in-unity/),
-[Unreal](/learn/behavior-trees-in-unreal-engine/), or
-[a robotics stack](/learn/behavior-trees-in-robotics/).
+如果你決定採用行為樹，最快建立直覺的方式就是動手做：在[免費線上行為樹編輯器](/)中繪製你的 agent——
+從[敵人 AI 範例](/?example=enemy-patrol)開始，改造成你自己的設計，然後匯出 JSON 到
+[Unity](/learn/behavior-trees-in-unity/)、
+[Unreal](/learn/behavior-trees-in-unreal-engine/) 或
+[機器人框架](/learn/behavior-trees-in-robotics/)。
 
-<a class="try-editor" href="/?example=enemy-patrol">▶ Open the enemy AI example in the editor</a>
+<a class="try-editor" href="/?example=enemy-patrol">▶ 在編輯器中開啟敵人 AI 範例</a>

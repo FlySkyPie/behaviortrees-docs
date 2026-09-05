@@ -1,8 +1,6 @@
 ---
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
 
-// Drafts build (so they can be previewed at their URL) but stay unlisted
-// here and out of the sitemap until draft: true is removed.
 const posts = Object.values(
     import.meta.glob('./*.md', { eager: true })
 )
@@ -11,20 +9,20 @@ const posts = Object.values(
 
 const sections = [
     {
-        title: 'Foundations',
-        description: 'Start with the mental model and the building blocks.',
+        title: '基礎概念',
+        description: '從心智模型和基本元件開始。',
         posts: posts.filter((post) => post.frontmatter.order <= 4),
     },
     {
-        title: 'Tools & platforms',
-        description: 'Choose an approach for the engine or runtime you use.',
+        title: '工具與平台',
+        description: '為您使用的引擎或執行環境選擇合適的方法。',
         posts: posts.filter(
             (post) => post.frontmatter.order > 4 && post.frontmatter.order <= 10
         ),
     },
     {
-        title: 'Practice & production',
-        description: 'Build, debug, and scale trees that hold up in real projects.',
+        title: '實戰與生產',
+        description: '建立、除錯並擴展足以應付真實專案的樹狀結構。',
         posts: posts.filter((post) => post.frontmatter.order > 10),
     },
 ].filter((section) => section.posts.length);
@@ -34,28 +32,29 @@ const guideId = (post) => `guide-${post.url.split('/').filter(Boolean).at(-1)}`;
 ---
 
 <ArticleLayout
-    title="Learn Behavior Trees - Guides for Game AI and Robotics"
-    description="Practical guides to behavior trees: core concepts, node types, blackboards, debugging, writing your own runtime, and how to use behavior trees in Unity, Unreal Engine, Python, and robotics."
+    title="學習行為樹 - 遊戲 AI 與機器人技術指南"
+    description="行為樹實戰指南：核心概念、節點類型、黑板、除錯、自行編寫運行環境，以及在 Unity、Unreal Engine、Python 和機器人技術中使用行為樹的方法。"
     variant="guide-index"
+    lang="zh_TW"
 >
     <header class="learn-hero">
-        <p class="eyebrow">Guide library <span aria-hidden="true">/</span> {posts.length} guides</p>
-        <h1>Learn behavior trees.<br /><span>Build smarter agents.</span></h1>
+        <p class="eyebrow">指南庫 <span aria-hidden="true">/</span> 共 {posts.length} 篇指南</p>
+        <h1>學習行為樹。<br /><span>建構更聰明的代理人。</span></h1>
         <p class="learn-intro">
-            A practical path from your first sequence node to production-ready game AI and
-            robotics. Every example opens in our <a href="/">free online editor</a>, so you can
-            learn by changing real trees.
+            一條從第一個序列節點到可量產的遊戲 AI 與機器人技術的實戰路徑。
+            每個範例都可以在我們的<a href="/">免費線上編輯器</a>中開啟，
+            讓您透過修改真實的樹來學習。
         </p>
         <a class="start-guide" href={posts[0].url}>
-            <span>Start with the introduction</span>
+            <span>從介紹開始</span>
             <span aria-hidden="true">→</span>
         </a>
     </header>
 
     <div class="guide-library">
-        <aside class="guide-nav" aria-label="Guides in this collection">
+        <aside class="guide-nav" aria-label="本系列指南">
             <div class="guide-nav-inner">
-                <p class="guide-nav-label">In this collection</p>
+                <p class="guide-nav-label">本系列目錄</p>
                 <ol>
                     {
                         posts.map((post, index) => (
