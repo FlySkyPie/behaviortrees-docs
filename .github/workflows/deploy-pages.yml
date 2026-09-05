@@ -9,8 +9,14 @@
 # Required GitHub Pages setting:
 #   Source -> "GitHub Actions" (not a branch/folder)
 #
-# If using a project page (user.github.io/repo), the absolute asset paths
-# in index.html will break — use a custom domain instead.
+# For project pages (username.github.io/repo), the site is served under
+# /repo-name/. The workflow auto-detects the repo name and sets GH_PAGES_BASE
+# so both Vite (%BASE_URL%) and Astro (base config) prefix asset paths.
+# For user sites (username.github.io) and custom domains, base is '/' —
+# the auto-detection also produces '/' for 'username.github.io' repos.
+# 
+# Required GitHub Pages setting:
+#   Source -> "GitHub Actions" (not a branch/folder)
 
 name: Deploy to GitHub Pages
 
@@ -44,9 +50,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Compute base path
+        id: base
+        run: echo "base=/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
+
       - name: Build editor + site
         env:
           VITE_CLERK_PUBLISHABLE_KEY: ''
+          GH_PAGES_BASE: ${{ steps.base.outputs.base }}
         run: pnpm exec turbo run build --filter=@behaviortrees/editor --filter=@behaviortrees/site
 
       - name: Merge site into editor dist

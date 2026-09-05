@@ -46,6 +46,9 @@ const examplesPlugin = (): Plugin => ({
 });
 
 export default defineConfig({
+	// When deploying to a GitHub Pages project page (user.github.io/repo), set
+	// GH_PAGES_BASE=/repo-name/ in the workflow env so assets resolve correctly.
+	base: process.env.GH_PAGES_BASE || '/',
 	plugins: [react(), tailwindcss(), examplesPlugin()],
 	server: {
 		// The sync API runs as Vercel functions; in dev, run `vercel dev --listen
@@ -55,9 +58,8 @@ export default defineConfig({
 		},
 	},
 	test: {
-		// Tests always run the local-only app: without this, a filled-in
-		// .env.local flips CLOUD_ENABLED and App renders Clerk components
-		// that need a provider only main.tsx supplies.
-		env: { VITE_CLERK_PUBLISHABLE_KEY: '' },
+		// Tests must not see GH_PAGES_BASE – it breaks assertions on element
+		// existence because /<repo>/ prefix is never present in test DOM.
+		env: { GH_PAGES_BASE: '', VITE_CLERK_PUBLISHABLE_KEY: '' },
 	},
 });

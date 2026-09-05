@@ -23,6 +23,10 @@ const draftUrls = new Set(
 export default defineConfig({
     site: SITE,
     trailingSlash: 'always',
+    // When deploying to a GitHub Pages project page (user.github.io/repo),
+    // set GH_PAGES_BASE=/repo-name/ in the workflow env so links resolve
+    // under the subpath. Defaults to '/' (domain root / custom domain).
+    base: process.env.GH_PAGES_BASE || '/',
     integrations: [
         sitemap({
             filter: (page) => !draftUrls.has(page),

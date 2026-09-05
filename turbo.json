@@ -4,7 +4,7 @@
         "build": {
             "dependsOn": ["^build"],
             "outputs": ["dist/**"],
-            "env": ["VITE_CLERK_PUBLISHABLE_KEY"]
+            "env": ["VITE_CLERK_PUBLISHABLE_KEY", "GH_PAGES_BASE"]
         },
         "dev": {
             "cache": false,

@@ -11,6 +11,7 @@ const lang = Astro.props.lang ?? frontmatter?.lang ?? 'zh_TW';
 const isZhTW = true;
 const locale = isZhTW ? 'zh_TW' : 'en';
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const base = import.meta.env.BASE_URL || '/';
 
 // Amazon Associates ID for the behaviortrees.com account.
 const amazonTag = 'behaviortrees-20';
@@ -55,8 +56,8 @@ const jsonLd = isArticle
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/imgs/logo.svg" />
-    <link rel="alternate icon" type="image/x-icon" href="/imgs/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href={`${base}imgs/logo.svg`} />
+    <link rel="alternate icon" type="image/x-icon" href={`${base}imgs/favicon.ico`} />
 
     <!-- Must run before any stylesheet so the first style resolution already
          sees the theme. Kept byte-identical with the editor app's index.html;
@@ -74,7 +75,7 @@ const jsonLd = isArticle
             }
         })();
     </script>
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={`${base}fonts/inter-latin.woff2`} crossorigin />
 
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -94,24 +95,24 @@ const jsonLd = isArticle
 
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 
-    <script async src="/pl/js/script.js"></script>
+    <script async src={`${base}pl/js/script.js`}></script>
     <script is:inline>
       window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-      plausible.init({ endpoint: "/pl/api/event" })
+      plausible.init({ endpoint: `${base}pl/api/event` })
     </script>
 </head>
 <body>
     <header class="site-header">
         <nav>
-            <a class="wordmark" href="/learn/">
-                <img src="/imgs/logo.svg" alt="" width="22" height="22" />
+            <a class="wordmark" href={`${base}learn/`}>
+                <img src={`${base}imgs/logo.svg`} alt="" width="22" height="22" />
                 <span class="brand">behavior<span>trees</span></span>
             </a>
             <div class="nav-links">
-                <a href="/learn/">{isZhTW ? '首頁' : 'Home'}</a>
-                <a href="/editor">{isZhTW ? '編輯器' : 'Editor'}</a>
-                <a href="/projects">{isZhTW ? '專案' : 'Projects'}</a>
-                <a href="/settings">{isZhTW ? '設定' : 'Settings'}</a>
+                <a href={`${base}learn/`}>{isZhTW ? '首頁' : 'Home'}</a>
+                <a href={`${base}editor`}>{isZhTW ? '編輯器' : 'Editor'}</a>
+                <a href={`${base}projects`}>{isZhTW ? '專案' : 'Projects'}</a>
+                <a href={`${base}settings`}>{isZhTW ? '設定' : 'Settings'}</a>
                 <button
                     type="button"
                     id="theme-toggle"
@@ -207,8 +208,8 @@ const jsonLd = isArticle
 
     <footer class="site-footer">
         <p>
-            <a href="/learn/">{isZhTW ? '指南' : 'Guides'}</a> ·
-            <a href="/">{isZhTW ? '行為樹編輯器' : 'Behavior Tree Editor'}</a> ·
+            <a href={`${base}learn/`}>{isZhTW ? '指南' : 'Guides'}</a> ·
+            <a href={`${base}`}>{isZhTW ? '行為樹編輯器' : 'Behavior Tree Editor'}</a> ·
             <a href="https://old.behaviortrees.com">{isZhTW ? '經典編輯器' : 'Classic editor'}</a> ·
             <a href="https://github.com/behaviortrees/behaviortrees">GitHub</a>
         </p>

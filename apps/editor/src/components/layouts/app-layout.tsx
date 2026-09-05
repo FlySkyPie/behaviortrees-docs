@@ -6,6 +6,8 @@ import AdminNavLink from '../auth/admin-nav-link';
 import { isAnalyticsEnabled } from '../../lib/analytics';
 import { CLOUD_ENABLED } from '../../lib/auth';
 
+const base = (import.meta as Record<string, any>).env.BASE_URL || '/';
+
 type AppLayoutProps = {
 	children: ReactNode;
 };
@@ -28,7 +30,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 		>
 			<header className="flex h-[54px] flex-none items-center gap-3 border-b border-divider px-3 sm:gap-6 sm:px-6 lg:gap-8">
 				<Link to="/" className="flex shrink-0 items-center gap-3">
-					<img src="/imgs/logo.svg" alt="" className="h-[22px] w-[22px] rounded-[5px]" />
+					<img src={`${base}imgs/logo.svg`} alt="" className="h-[22px] w-[22px] rounded-[5px]" />
 					<span className="hidden text-[15px] font-medium tracking-[-0.01em] lg:inline">
 						behavior<span className="text-accent">trees</span>
 					</span>
@@ -53,7 +55,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 						</li>
 						<li>
 							{/* Static guides site deployed alongside the app */}
-							<a href="/learn/" className="text-muted transition-colors hover:text-accent-soft">
+							<a href={`${base}learn/`} className="text-muted transition-colors hover:text-accent-soft">
 								學習
 							</a>
 						</li>
@@ -94,7 +96,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 					<footer className="border-t border-divider">
 						<div className="container mx-auto px-6 py-5 text-center text-[13px] text-muted">
 							&copy; {new Date().getFullYear()} behaviortrees.com ·{' '}
-							<a href="/learn/" className="text-accent-soft hover:underline">
+							<a href={`${base}learn/`} className="text-accent-soft hover:underline">
 								學習行為樹
 							</a>{' '}
 							·{' '}

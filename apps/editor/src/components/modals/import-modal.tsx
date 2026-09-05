@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { ClipboardPaste, FileUp, Workflow } from 'lucide-react';
 
 // Bundled example trees from @behaviortrees/examples, served at /examples
+const base = (import.meta as Record<string, any>).env.BASE_URL || '/';
 const EXAMPLES = [
 	{
 		file: 'open-the-door',
@@ -110,7 +111,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onOpenChange }) => {
 	const handleExample = async (file: string) => {
 		setLoadingExample(file);
 		try {
-			const response = await fetch(`/examples/${file}.json`);
+			const response = await fetch(`${base}examples/${file}.json`);
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 			importJson(await response.json(), 'example');
 		} catch (error) {

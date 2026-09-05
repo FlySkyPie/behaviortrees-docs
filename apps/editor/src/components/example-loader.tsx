@@ -6,6 +6,8 @@ import { b3ToProject, b3ToTree, parseImportedJson } from '../lib/behavior/b3';
 import { track } from '../lib/analytics';
 import { setProjectOrigin } from '../lib/product-metrics';
 
+const base = (import.meta as Record<string, any>).env.BASE_URL || '/';
+
 // Deep links from the /learn guides: /?example=enemy-patrol fetches
 // /examples/enemy-patrol.json and opens it in a stable "Examples" project,
 // mirroring the classic editor's example loading.
@@ -25,7 +27,7 @@ const ExampleLoader = () => {
 
 		(async () => {
 			try {
-				const response = await fetch(`/examples/${name}.json`);
+				const response = await fetch(`${base}examples/${name}.json`);
 				if (!response.ok) throw new Error(`HTTP ${response.status}`);
 				const imported = parseImportedJson(await response.json());
 				if (imported.kind === 'nodes') throw new Error('example is not a tree or project file');
@@ -87,7 +89,7 @@ const ExampleLoader = () => {
 				setProjectOrigin(EXAMPLES_PROJECT_ID, 'guide_example');
 
 				// Drop the query string and land in the editor
-				window.history.replaceState(null, '', '/');
+				window.history.replaceState(null, '', base);
 				navigate('/editor');
 				track('example_loaded', { example: name });
 				toast.success(`Example "${label}" loaded`);

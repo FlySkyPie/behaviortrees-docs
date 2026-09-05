@@ -17,6 +17,7 @@ import './index.css';
 
 function App() {
 	const restoreLastProject = useProjectStore((state) => state.restoreLastProject);
+	const base = (import.meta as Record<string, any>).env.BASE_URL || '/';
 
 	// Reopen the last project on startup, like the old editor's recents
 	useEffect(() => {
@@ -28,7 +29,7 @@ function App() {
 	const { resolved } = useTheme();
 
 	return (
-		<BrowserRouter>
+		<BrowserRouter basename={base}>
 			<Toaster position="bottom-right" theme={resolved} />
 			<ExampleLoader />
 			<ProductAnalyticsTracker />
